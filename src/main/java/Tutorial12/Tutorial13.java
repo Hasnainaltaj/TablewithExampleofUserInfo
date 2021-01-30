@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -36,7 +37,10 @@ public class Tutorial13 extends Application {
         listView1.setCellFactory(e -> {
             return new ColorName();
         });
+        // To set Orientation
         listView1.setOrientation(Orientation.HORIZONTAL);
+        //To set Multiple selection at the same time
+        listView1.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         Label label = new Label();
         label.setLayoutX(10);
