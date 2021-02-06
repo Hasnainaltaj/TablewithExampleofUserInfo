@@ -2,24 +2,25 @@ package Tutorial12;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-public class Tutorial14 extends Application {
+public class Tutorial17 extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
@@ -28,26 +29,28 @@ public class Tutorial14 extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tutorial 14 - SQLite");
+        primaryStage.setTitle("JavaFX 8 Tutorial 17 - Switching Scenes");
         CheckConnection();
 
 //        AnchorPane anchorPane = new AnchorPane();
 //        Scene scene = new Scene(anchorPane, 400, 400);
 //        primaryStage.setScene(scene);
 
+        BorderPane layout = new BorderPane();
+        Scene newScene = new Scene(layout, 500, 250, Color.rgb(0, 0, 0, 0));
 
         // Create transparent stage
-        primaryStage.initStyle(StageStyle.TRANSPARENT);
+        //primaryStage.initStyle(StageStyle.TRANSPARENT);
 
         Group root = new Group();
-        Scene scene = new Scene(root, 220, 210, Color.rgb(0, 0, 0, 0));
+        Scene scene = new Scene(root, 420, 210, Color.rgb(0, 0, 0, 0));
         //Cascading Style Sheet (CSS)
         scene.getStylesheets().add(getClass().getResource("../Style.css").toExternalForm());
         Color foreground = Color.rgb(255, 255, 255, 0.9);
 
         //Rounded Rectangular where we will add our components
         //Rectangular Background
-        Rectangle background = new Rectangle(220, 210);
+        Rectangle background = new Rectangle(420, 210);
         background.setX(0);
         background.setY(0);
         background.setArcHeight(15);
@@ -66,7 +69,7 @@ public class Tutorial14 extends Application {
         userName.setFont(Font.font("SanSerif", 20));
         userName.setPromptText("User Name");
 
-        userName.getStylesheets().add("@Field-background");
+        userName.getStyleClass().add("field-background");
 
         userName.setMaxWidth(200);
 
@@ -90,9 +93,12 @@ public class Tutorial14 extends Application {
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     label.setText("Login Successful");
+                    primaryStage.setScene(newScene);
                 } else {
                     label.setText("Login Failed");
                 }
+                userName.clear();
+                password.clear();
                 preparedStatement.close();
                 resultSet.close();
             } catch (Exception e1) {
@@ -110,9 +116,12 @@ public class Tutorial14 extends Application {
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     label.setText("Login Successful");
+                    primaryStage.setScene(newScene);
                 } else {
                     label.setText("Login Failed");
                 }
+                userName.clear();
+                password.clear();
                 preparedStatement.close();
                 resultSet.close();
             } catch (Exception e1) {
@@ -130,9 +139,12 @@ public class Tutorial14 extends Application {
                 resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     label.setText("Login Successful");
+                    primaryStage.setScene(newScene);
                 } else {
                     label.setText("Login Failed");
                 }
+                userName.clear();
+                password.clear();
                 preparedStatement.close();
                 resultSet.close();
             } catch (Exception e1) {
@@ -142,7 +154,15 @@ public class Tutorial14 extends Application {
             }
         });
 
-
+        Button logout = new Button("Logout");
+        logout.setFont(Font.font("SanSerif", 15));
+        logout.setOnAction(e -> {
+            primaryStage.setScene(scene);
+            primaryStage.show();
+        });
+        layout.setTop(logout);
+        BorderPane.setAlignment(logout, Pos.TOP_RIGHT);
+        BorderPane.setMargin(logout, new Insets(10));
         vBox.getChildren().addAll(label, userName, password, button);
         root.getChildren().addAll(background, vBox);
         primaryStage.setScene(scene);
