@@ -17,7 +17,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-public class Tutorial18 extends Application {
+public class Tutorial20 extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
@@ -25,11 +25,12 @@ public class Tutorial18 extends Application {
 
     TextField id, fn, ln, em, un;
     PasswordField pw;
+    DatePicker datePicker;
 
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tutorial 18");
+        primaryStage.setTitle("JavaFX 8 Tutorial 20 - DatePicker");
 
 
 //        AnchorPane anchorPane = new AnchorPane();
@@ -37,7 +38,7 @@ public class Tutorial18 extends Application {
 //        primaryStage.setScene(scene);
         CheckConnection();
         BorderPane layout = new BorderPane();
-        Scene newScene = new Scene(layout, 500, 500, Color.rgb(0, 0, 0, 0));
+        Scene newScene = new Scene(layout, 330, 500, Color.rgb(0, 0, 0, 0));
 
         // Create transparent stage
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
@@ -151,7 +152,7 @@ public class Tutorial18 extends Application {
         label1.setFont(new Font("SanSerif", 15));
 
         id = new TextField();
-        id.setFont(Font.font("SanSerif", 15));
+        id.setFont(Font.font("SanSerif", 20));
         id.setPromptText("ID");
         id.setMaxWidth(300);
 
@@ -180,12 +181,17 @@ public class Tutorial18 extends Application {
         pw.setPromptText("Password");
         pw.setMaxWidth(300);
 
+        datePicker = new DatePicker();
+        datePicker.setStyle("-fx-font-size: 20");
+        datePicker.setPromptText("Date of Birth");
+        datePicker.setMaxWidth(300);
+
         Button save = new Button("Save");
         save.setFont(Font.font("SanSerif", 15));
 
         save.setOnAction(e -> {
             try {
-                String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,UserName,Password) VALUES (?,?,?,?,?,?)";
+                String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,UserName,Password,DOB) VALUES (?,?,?,?,?,?,?)";
                 preparedStatement = conn.prepareStatement(query);
                 preparedStatement.setString(1, id.getText());
                 preparedStatement.setString(2, fn.getText());
@@ -193,6 +199,7 @@ public class Tutorial18 extends Application {
                 preparedStatement.setString(4, em.getText());
                 preparedStatement.setString(5, un.getText());
                 preparedStatement.setString(6, pw.getText());
+                preparedStatement.setString(7, ((TextField) datePicker.getEditor()).getText());
                 preparedStatement.execute();
                 clearField();
 
@@ -209,7 +216,7 @@ public class Tutorial18 extends Application {
                 e2.printStackTrace();
             }
         });
-        fields.getChildren().addAll(label1, id, fn, ln, em, un, pw, save);
+        fields.getChildren().addAll(label1, id, fn, ln, em, un, pw, datePicker, save);
         layout.setCenter(fields);
         BorderPane.setMargin(fields, new Insets(0, 0, 0, 20));
 
@@ -225,6 +232,7 @@ public class Tutorial18 extends Application {
         em.clear();
         un.clear();
         pw.clear();
+        datePicker.setValue(null);
     }
 
 

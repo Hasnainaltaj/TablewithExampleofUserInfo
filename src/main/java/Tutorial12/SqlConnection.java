@@ -12,7 +12,7 @@ public class SqlConnection {
         try {
             Connection conn = null;
             Class.forName("org.sqlite.JDBC");
-            conn = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\lenovo\\Downloads\\javafx-tasks-master\\TablewithExampleofUserInfo\\src\\main\\resources\\UserDatabase.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\lenovo\\IdeaProjects\\TablewithExampleofUserInfo\\src\\main\\resources\\UserDatabase.db");
             return conn;
 
         } catch (ClassNotFoundException | SQLException e) {

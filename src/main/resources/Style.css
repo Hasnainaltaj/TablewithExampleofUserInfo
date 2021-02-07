@@ -8,10 +8,19 @@
 }
 
 .field-background {
-    -fx-text-fill: red;
+    -fx-text-fill: black;
     /*-fx-prompt-text-fill: gray;*/
     -fx-highlight-fill: gray;
     -fx-highlight-text-fill: black;
     -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-alignment: center;
+}
+
+.field-password {
+    -fx-text-fill: #322f2f;
+    /*-fx-prompt-text-fill: gray;*/
+    -fx-highlight-fill: #f3c8c8;
+    -fx-highlight-text-fill: #b01919;
+    -fx-background-color: rgb(190, 229, 128);
     -fx-alignment: center;
 }
