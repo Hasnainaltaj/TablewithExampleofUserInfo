@@ -22,7 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class Tutorial22 extends Application {
+public class Tutorial23 extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
@@ -38,7 +38,7 @@ public class Tutorial22 extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tutorial 22 - ComboBox and Database");
+        primaryStage.setTitle("JavaFX 8 Tutorial 23 - ComboBox, TextField and Database");
 
 
         CheckConnection();
@@ -284,6 +284,32 @@ public class Tutorial22 extends Application {
         comboBox.setMaxHeight(30);
         comboBox.setMaxWidth(300);
         comboBox.setPromptText("First Name");
+
+        comboBox.setOnAction(e -> {
+            String query = "SELECT * FROM UserTable WHERE FirstName = ?";
+
+            try {
+                preparedStatement = conn.prepareStatement(query);
+                preparedStatement.setString(1, (String) comboBox.getSelectionModel().getSelectedItem());
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    id.setText(resultSet.getString("ID"));
+                    fn.setText(resultSet.getString("FirstName"));
+                    ln.setText(resultSet.getString("LastName"));
+                    em.setText(resultSet.getString("Email"));
+                    un.setText(resultSet.getString("UserName"));
+                    pw.setText(resultSet.getString("Password"));
+                    ((TextField) datePicker.getEditor()).setText(resultSet.getString("DOB"));
+                }
+                preparedStatement.close();
+                resultSet.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+        });
+
         HBox hBox = new HBox(5);
         hBox.getChildren().addAll(load, comboBox, clear);
         fields.getChildren().add(hBox);
