@@ -9,6 +9,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -22,7 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class Tutorial23 extends Application {
+public class Tutorial27 extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
@@ -38,7 +39,7 @@ public class Tutorial23 extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tutorial 23 - ComboBox, TextField and Database");
+        primaryStage.setTitle("JavaFX 8 Tutorial 27 - Warning Alert Validate Fields");
 
 
         CheckConnection();
@@ -91,54 +92,76 @@ public class Tutorial23 extends Application {
         button.setMaxWidth(200);
 
 
-        password.setOnAction(e -> {
-            try {
-                String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
-                preparedStatement = conn.prepareStatement(query);
-                preparedStatement.setString(1, userName.getText());
-                preparedStatement.setString(2, password.getText());
-                resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    label.setText("Login Successful");
-                    primaryStage.setScene(newScene);
-                } else {
-                    label.setText("Login Failed");
+        password.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.getKeyCode("Enter")) {
+                try {
+                    String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
+                    preparedStatement = conn.prepareStatement(query);
+                    preparedStatement.setString(1, userName.getText());
+                    preparedStatement.setString(2, password.getText());
+                    resultSet = preparedStatement.executeQuery();
+                    if (resultSet.next()) {
+                        label.setText("Login Successful");
+                        primaryStage.setScene(newScene);
+                    } else {
+                        label.setText("Login Failed");
+                    }
+                    userName.clear();
+                    password.clear();
+                    preparedStatement.close();
+                    resultSet.close();
+                } catch (Exception e1) {
+                    label.setText("SQL Error");
+                    e1.printStackTrace();
+                    System.out.println(e1);
                 }
-                userName.clear();
-                password.clear();
-                preparedStatement.close();
-                resultSet.close();
-            } catch (Exception e1) {
-                label.setText("SQL Error");
-                e1.printStackTrace();
-                System.out.println(e1);
             }
         });
-        userName.setOnAction(e -> {
-            try {
-                String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
-                preparedStatement = conn.prepareStatement(query);
-                preparedStatement.setString(1, userName.getText());
-                preparedStatement.setString(2, password.getText());
-                resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    label.setText("Login Successful");
-                    primaryStage.setScene(newScene);
-                } else {
-                    label.setText("Login Failed");
-                }
-                userName.clear();
-                password.clear();
-                preparedStatement.close();
-                resultSet.close();
-            } catch (Exception e1) {
-                label.setText("SQL Error");
-                e1.printStackTrace();
-                System.out.println(e1);
-            }
-        });
+//        userName.setOnAction(e -> {
+//            try {
+//                String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
+//                preparedStatement = conn.prepareStatement(query);
+//                preparedStatement.setString(1, userName.getText());
+//                preparedStatement.setString(2, password.getText());
+//                resultSet = preparedStatement.executeQuery();
+//                if (resultSet.next()) {
+//                    label.setText("Login Successful");
+//                    primaryStage.setScene(newScene);
+//                } else {
+//                    label.setText("Login Failed");
+//                }
+//                userName.clear();
+//                password.clear();
+//                preparedStatement.close();
+//                resultSet.close();
+//            } catch (Exception e1) {
+//                label.setText("SQL Error");
+//                e1.printStackTrace();
+//                System.out.println(e1);
+//            }
+//        });
         button.setOnAction(e -> {
-
+            try {
+                String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
+                preparedStatement = conn.prepareStatement(query);
+                preparedStatement.setString(1, userName.getText());
+                preparedStatement.setString(2, password.getText());
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    label.setText("Login Successful");
+                    primaryStage.setScene(newScene);
+                } else {
+                    label.setText("Login Failed");
+                }
+                userName.clear();
+                password.clear();
+                preparedStatement.close();
+                resultSet.close();
+            } catch (Exception e1) {
+                label.setText("SQL Error");
+                e1.printStackTrace();
+                System.out.println(e1);
+            }
         });
 
         Button logout = new Button("Logout");
@@ -209,30 +232,33 @@ public class Tutorial23 extends Application {
         save.setFont(Font.font("SanSerif", 15));
 
         save.setOnAction(e -> {
-            try {
-                String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,UserName,Password,DOB) VALUES (?,?,?,?,?,?,?)";
-                preparedStatement = conn.prepareStatement(query);
-                preparedStatement.setString(1, id.getText());
-                preparedStatement.setString(2, fn.getText());
-                preparedStatement.setString(3, ln.getText());
-                preparedStatement.setString(4, em.getText());
-                preparedStatement.setString(5, un.getText());
-                preparedStatement.setString(6, pw.getText());
-                preparedStatement.setString(7, ((TextField) datePicker.getEditor()).getText());
-                preparedStatement.execute();
-                clearField();
+            if (validateFields()) {
+                try {
+                    String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,UserName,Password,DOB) VALUES (?,?,?,?,?,?,?)";
+                    preparedStatement = conn.prepareStatement(query);
+                    preparedStatement.setString(1, id.getText());
+                    preparedStatement.setString(2, fn.getText());
+                    preparedStatement.setString(3, ln.getText());
+                    preparedStatement.setString(4, em.getText());
+                    preparedStatement.setString(5, un.getText());
+                    preparedStatement.setString(6, pw.getText());
+                    preparedStatement.setString(7, ((TextField) datePicker.getEditor()).getText());
+                    preparedStatement.execute();
+                    clearField();
 
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Information Dialog");
-                alert.setHeaderText(null);
-                alert.setContentText("تم اضافة الحساب");
-                alert.showAndWait();
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Information Dialog");
+                    alert.setHeaderText(null);
+                    alert.setContentText("تم اضافة الحساب");
+                    alert.showAndWait();
 
 
-                preparedStatement.close();
+                    preparedStatement.close();
+                    load();
 
-            } catch (Exception e2) {
-                e2.printStackTrace();
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
             }
         });
         fields.getChildren().addAll(label1, id, fn, ln, em, un, pw, datePicker, save);
@@ -367,6 +393,30 @@ public class Tutorial23 extends Application {
             ex.printStackTrace();
         }
 
+    }
+
+    private boolean validateFields() {
+        Alert warning = new Alert(Alert.AlertType.WARNING);
+        warning.setTitle("Empty fields");
+        warning.setHeaderText(null);
+        if (
+                id.getText().isEmpty() |
+                        fn.getText().isEmpty() |
+                        ln.getText().isEmpty() |
+                        em.getText().isEmpty() |
+                        un.getText().isEmpty() |
+                        pw.getText().isEmpty()
+        ) {
+            warning.setContentText("Empty Fields");
+            warning.showAndWait();
+            return false;
+        }
+        if (datePicker.getEditor().getText().isEmpty()) {
+            warning.setContentText("please enter date of birth in (dd/mm/yyyy) format");
+            warning.showAndWait();
+            return false;
+        }
+        return true;
     }
 
     public void clearField() {

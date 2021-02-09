@@ -9,6 +9,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -22,7 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class Tutorial23 extends Application {
+public class Tutorial26 extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
@@ -38,7 +39,7 @@ public class Tutorial23 extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tutorial 23 - ComboBox, TextField and Database");
+        primaryStage.setTitle("JavaFX 8 Tutorial 26 - Login on Enter key pressed");
 
 
         CheckConnection();
@@ -91,54 +92,76 @@ public class Tutorial23 extends Application {
         button.setMaxWidth(200);
 
 
-        password.setOnAction(e -> {
-            try {
-                String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
-                preparedStatement = conn.prepareStatement(query);
-                preparedStatement.setString(1, userName.getText());
-                preparedStatement.setString(2, password.getText());
-                resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    label.setText("Login Successful");
-                    primaryStage.setScene(newScene);
-                } else {
-                    label.setText("Login Failed");
+        password.setOnKeyPressed(e -> {
+            if(e.getCode() == KeyCode.getKeyCode("Enter")){
+                try {
+                    String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
+                    preparedStatement = conn.prepareStatement(query);
+                    preparedStatement.setString(1, userName.getText());
+                    preparedStatement.setString(2, password.getText());
+                    resultSet = preparedStatement.executeQuery();
+                    if (resultSet.next()) {
+                        label.setText("Login Successful");
+                        primaryStage.setScene(newScene);
+                    } else {
+                        label.setText("Login Failed");
+                    }
+                    userName.clear();
+                    password.clear();
+                    preparedStatement.close();
+                    resultSet.close();
+                } catch (Exception e1) {
+                    label.setText("SQL Error");
+                    e1.printStackTrace();
+                    System.out.println(e1);
                 }
-                userName.clear();
-                password.clear();
-                preparedStatement.close();
-                resultSet.close();
-            } catch (Exception e1) {
-                label.setText("SQL Error");
-                e1.printStackTrace();
-                System.out.println(e1);
             }
         });
-        userName.setOnAction(e -> {
-            try {
-                String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
-                preparedStatement = conn.prepareStatement(query);
-                preparedStatement.setString(1, userName.getText());
-                preparedStatement.setString(2, password.getText());
-                resultSet = preparedStatement.executeQuery();
-                if (resultSet.next()) {
-                    label.setText("Login Successful");
-                    primaryStage.setScene(newScene);
-                } else {
-                    label.setText("Login Failed");
-                }
-                userName.clear();
-                password.clear();
-                preparedStatement.close();
-                resultSet.close();
-            } catch (Exception e1) {
-                label.setText("SQL Error");
-                e1.printStackTrace();
-                System.out.println(e1);
-            }
-        });
+//        userName.setOnAction(e -> {
+//            try {
+//                String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
+//                preparedStatement = conn.prepareStatement(query);
+//                preparedStatement.setString(1, userName.getText());
+//                preparedStatement.setString(2, password.getText());
+//                resultSet = preparedStatement.executeQuery();
+//                if (resultSet.next()) {
+//                    label.setText("Login Successful");
+//                    primaryStage.setScene(newScene);
+//                } else {
+//                    label.setText("Login Failed");
+//                }
+//                userName.clear();
+//                password.clear();
+//                preparedStatement.close();
+//                resultSet.close();
+//            } catch (Exception e1) {
+//                label.setText("SQL Error");
+//                e1.printStackTrace();
+//                System.out.println(e1);
+//            }
+//        });
         button.setOnAction(e -> {
-
+            try {
+                String query = "SELECT * FROM UserTable WHERE UserName = ? and Password = ?";
+                preparedStatement = conn.prepareStatement(query);
+                preparedStatement.setString(1, userName.getText());
+                preparedStatement.setString(2, password.getText());
+                resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    label.setText("Login Successful");
+                    primaryStage.setScene(newScene);
+                } else {
+                    label.setText("Login Failed");
+                }
+                userName.clear();
+                password.clear();
+                preparedStatement.close();
+                resultSet.close();
+            } catch (Exception e1) {
+                label.setText("SQL Error");
+                e1.printStackTrace();
+                System.out.println(e1);
+            }
         });
 
         Button logout = new Button("Logout");
