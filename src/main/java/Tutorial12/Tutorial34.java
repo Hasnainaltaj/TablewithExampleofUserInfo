@@ -23,8 +23,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class Tutorial28 extends Application {
+public class Tutorial34 extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
@@ -34,13 +36,15 @@ public class Tutorial28 extends Application {
     PasswordField pw;
     DatePicker datePicker;
     final ObservableList options = FXCollections.observableArrayList();
-    TableView<User1> tableView = new TableView<>();
-    final ObservableList<User1> data = FXCollections.observableArrayList();
-
+    TableView<User2> tableView = new TableView<>();
+    final ObservableList<User2> data = FXCollections.observableArrayList();
+    private RadioButton male;
+    private RadioButton female;
+    private String radioButtonLabel;
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tutorial 28 - Delete User From Database");
+        primaryStage.setTitle("JavaFX 8 Tut 34 - Fetch/Get RadioButton Value From DB");
 
 
         CheckConnection();
@@ -67,6 +71,7 @@ public class Tutorial28 extends Application {
         background.setFill(Color.rgb(0, 0, 0, 0.55));
         background.setStroke(foreground);
         background.setStrokeWidth(1.5);
+
 
         VBox vBox = new VBox(5);
         vBox.setPadding(new Insets(10, 0, 0, 10));
@@ -229,13 +234,27 @@ public class Tutorial28 extends Application {
         datePicker.setPromptText("Date of Birth");
         datePicker.setMaxWidth(300);
 
+        ToggleGroup gender = new ToggleGroup();
+        male = new RadioButton("Male");
+        male.setToggleGroup(gender);
+        male.setOnAction(e -> {
+            radioButtonLabel = male.getText();
+        });
+        female = new RadioButton("Female");
+        female.setToggleGroup(gender);
+        //To get the value of the Radio Button
+        female.setOnAction(e -> {
+            radioButtonLabel = female.getText();
+        });
+//        gender.getToggles().addAll(male, female);
+
         Button save = new Button("Save");
         save.setFont(Font.font("SanSerif", 15));
 
         save.setOnAction(e -> {
-            if (validateFields()) {
+            if (validateFields() && validateNumber()) {
                 try {
-                    String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,UserName,Password,DOB) VALUES (?,?,?,?,?,?,?)";
+                    String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,UserName,Password,DOB, gender) VALUES (?,?,?,?,?,?,?,?)";
                     preparedStatement = conn.prepareStatement(query);
                     preparedStatement.setString(1, id.getText());
                     preparedStatement.setString(2, fn.getText());
@@ -244,6 +263,7 @@ public class Tutorial28 extends Application {
                     preparedStatement.setString(5, un.getText());
                     preparedStatement.setString(6, pw.getText());
                     preparedStatement.setString(7, ((TextField) datePicker.getEditor()).getText());
+                    preparedStatement.setString(8, radioButtonLabel);
                     preparedStatement.execute();
                     clearField();
 
@@ -264,25 +284,30 @@ public class Tutorial28 extends Application {
                 fillComboBox();
             }
         });
-        fields.getChildren().addAll(label1, id, fn, ln, em, un, pw, datePicker, save);
+        fields.getChildren().addAll(label1, id, fn, ln, em, un, pw, datePicker, male, female, save);
         layout.setCenter(fields);
         BorderPane.setMargin(fields, new Insets(0, 0, 0, 20));
 
 
         TableColumn column1 = new TableColumn("ID");
         column1.setMinWidth(20);
+        column1.setPrefWidth(20);
+        column1.setMaxWidth(20);
         column1.setCellValueFactory(new PropertyValueFactory<>("id"));
 
         TableColumn column2 = new TableColumn("First Name");
-        column2.setMinWidth(80);
+        column2.setMinWidth(70);
+        column2.setMaxWidth(70);
         column2.setCellValueFactory(new PropertyValueFactory<>("FirstName"));
 
         TableColumn column3 = new TableColumn("Last Name");
-        column3.setMinWidth(80);
+        column3.setMinWidth(70);
+        column3.setMaxWidth(70);
         column3.setCellValueFactory(new PropertyValueFactory<>("LastName"));
 
         TableColumn column4 = new TableColumn("E-mail");
         column4.setMinWidth(150);
+        column4.setMaxWidth(150);
         column4.setCellValueFactory(new PropertyValueFactory<>("Email"));
 
         TableColumn column5 = new TableColumn("User Name");
@@ -297,7 +322,11 @@ public class Tutorial28 extends Application {
         column7.setMinWidth(80);
         column7.setCellValueFactory(new PropertyValueFactory<>("DOB"));
 
-        tableView.getColumns().addAll(column1, column2, column3, column4, column5, column6, column7);
+        TableColumn column8 = new TableColumn("Gender");
+        column8.setMinWidth(60);
+        column8.setCellValueFactory(new PropertyValueFactory<>("gender"));
+
+        tableView.getColumns().addAll(column1, column2, column3, column4, column5, column6, column7, column8);
         //tableView.setTableMenuButtonVisible(true);
         layout.setRight(tableView);
         BorderPane.setMargin(tableView, new Insets(0, 10, 10, 0));
@@ -331,6 +360,33 @@ public class Tutorial28 extends Application {
                     un.setText(resultSet.getString("UserName"));
                     pw.setText(resultSet.getString("Password"));
                     ((TextField) datePicker.getEditor()).setText(resultSet.getString("DOB"));
+//                    if ("Male".equals(resultSet.getString("Gender"))) {
+//                        male.setSelected(true);
+//                    } else if ("Female".equals(resultSet.getString("Gender"))) {
+//                        female.setSelected(true);
+//                    } else {
+//
+//                        male.setSelected(false);
+//                        female.setSelected(false);
+//                    }
+
+                    //SWITCH Retrieve data into comboBox
+                    if (null != resultSet.getString("Gender")) switch (resultSet.getString("gender")) {
+                        case "Male":
+                            male.setSelected(true);
+                            break;
+                        case "Female":
+                            female.setSelected(true);
+                            break;
+                        default:
+                            male.setSelected(false);
+                            female.setSelected(false);
+                            break;
+                    }
+                    else {
+                        male.setSelected(false);
+                        female.setSelected(false);
+                    }
                 }
                 preparedStatement.close();
                 resultSet.close();
@@ -350,38 +406,28 @@ public class Tutorial28 extends Application {
             alert.setContentText("سيتم حذف أسم مستخدم!!!");
             Optional<ButtonType> action = alert.showAndWait();
             if (action.get() == ButtonType.OK) {
-                if (validateFields()) {
-                    try {
-                        String query = "DELETE FROM UserTable WHERE id = ?";
-                        preparedStatement = conn.prepareStatement(query);
-                        preparedStatement.setString(1, id.getText());
-                        preparedStatement.executeUpdate();
-                        preparedStatement.close();
-                    } catch (SQLException throwables) {
-                        System.out.println(throwables);
-                    }
-                    clearField();
-                    fillComboBox();
-                    load();
+//                if (validateFields()) {
+                try {
+                    String query = "DELETE FROM UserTable WHERE id = ?";
+                    preparedStatement = conn.prepareStatement(query);
+                    preparedStatement.setString(1, id.getText());
+                    preparedStatement.executeUpdate();
+                    preparedStatement.close();
+                } catch (SQLException throwables) {
+                    System.out.println(throwables);
                 }
+                clearField();
+                fillComboBox();
+                load();
             }
-
+//            }
         });
 
-
         HBox hBox = new HBox(5);
-        hBox.getChildren().
-
-                addAll(load, comboBox, clear, delete);
-        fields.getChildren().
-
-                add(hBox);
+        hBox.getChildren().addAll(load, comboBox, clear, delete);
+        fields.getChildren().add(hBox);
         //layout.setBottom(hBox);
-        BorderPane.setMargin(hBox, new
-
-                Insets(10));
-
-
+        BorderPane.setMargin(hBox, new Insets(10));
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -390,19 +436,21 @@ public class Tutorial28 extends Application {
     public void load() {
         data.clear();
         try {
-            String query = "select * from UserTable";
+            String query = "SELECT * FROM UserTable";
             preparedStatement = conn.prepareStatement(query);
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                data.add(new User1(
+                data.add(new User2(
                         resultSet.getInt("id"),
                         resultSet.getString("firstName"),
                         resultSet.getString("LastName"),
                         resultSet.getString("Email"),
                         resultSet.getString("UserName"),
                         resultSet.getString("Password"),
-                        resultSet.getString("DOB")
+                        resultSet.getString("DOB"),
+                        resultSet.getString("gender")
+
                 ));
                 tableView.setItems(data);
             }
@@ -434,12 +482,26 @@ public class Tutorial28 extends Application {
 
     }
 
+    private boolean validateNumber() {
+        Pattern pattern = Pattern.compile("[0 - 9] +");
+        Matcher matcher = pattern.matcher(id.getText());
+        if (matcher.find() && matcher.group().equals(id.getText())) {
+            return true;
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Validate Nubmber");
+            alert.setHeaderText(null);
+            alert.setContentText("الرجاء ادخال رقم لتسلسل المستخدم!");
+            return false;
+        }
+    }
+
     private boolean validateFields() {
         Alert warning = new Alert(Alert.AlertType.WARNING);
         warning.setTitle("Empty fields");
         warning.setHeaderText(null);
         if (
-                id.getText().isEmpty() |
+//                id.getText().isEmpty() |
                         fn.getText().isEmpty() |
                         ln.getText().isEmpty() |
                         em.getText().isEmpty() |
@@ -455,6 +517,11 @@ public class Tutorial28 extends Application {
             warning.showAndWait();
             return false;
         }
+        if (!(male.isSelected() | female.isSelected())) {
+            warning.setContentText("please choose gender");
+            warning.showAndWait();
+            return false;
+        }
         return true;
     }
 
@@ -466,6 +533,8 @@ public class Tutorial28 extends Application {
         un.clear();
         pw.clear();
         ((TextField) datePicker.getEditor()).setText(null);
+        male.setSelected(false);
+        female.setSelected(false);
 //        datePicker.setValue(null);
     }
 
