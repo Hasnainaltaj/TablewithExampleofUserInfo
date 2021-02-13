@@ -8,16 +8,18 @@ public class User2 {
     private final SimpleObjectProperty firstName;
     private final SimpleObjectProperty lastName;
     private final SimpleObjectProperty email;
+    private final SimpleObjectProperty mobile;
     private final SimpleObjectProperty userName;
     private final SimpleObjectProperty password;
     private final SimpleObjectProperty DOB;
     private final SimpleObjectProperty gender;
 
-    public User2(int id, String firstName, String lastName, String email, String userName, String password, String DOB, String gender) {
+    public User2(int id, String firstName, String lastName, String email, String mobile, String userName, String password, String DOB, String gender) {
         this.id = new SimpleObjectProperty(id);
         this.firstName = new SimpleObjectProperty(firstName);
         this.lastName = new SimpleObjectProperty(lastName);
         this.email = new SimpleObjectProperty(email);
+        this.mobile = new SimpleObjectProperty(mobile);
         this.userName = new SimpleObjectProperty(userName);
         this.password = new SimpleObjectProperty(password);
         this.DOB = new SimpleObjectProperty(DOB);
@@ -39,6 +41,10 @@ public class User2 {
 
     public Object getEmail() {
         return email.get();
+    }
+
+    public Object getMobile() {
+        return mobile.get();
     }
 
     public Object getUserName() {
@@ -68,6 +74,10 @@ public class User2 {
 
     public void setEmail(String email) {
         this.email.set(email);
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile.set(mobile);
     }
 
     public void setId(int id) {

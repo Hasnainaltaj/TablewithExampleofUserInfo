@@ -32,7 +32,7 @@ public class Tutorial34 extends Application {
     PreparedStatement preparedStatement = null;
     ResultSet resultSet = null;
 
-    TextField id, fn, ln, em, un;
+    TextField id, fn, ln, em, un, mobile;
     PasswordField pw;
     DatePicker datePicker;
     final ObservableList options = FXCollections.observableArrayList();
@@ -41,16 +41,17 @@ public class Tutorial34 extends Application {
     private RadioButton male;
     private RadioButton female;
     private String radioButtonLabel;
+    private ListView listView = new ListView(options);
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tut 34 - Fetch/Get RadioButton Value From DB");
+        primaryStage.setTitle("JavaFX 8 Tut 38 - Mobile Number Validation");
 
 
         CheckConnection();
         fillComboBox();
         BorderPane layout = new BorderPane();
-        Scene newScene = new Scene(layout, 1000, 600, Color.rgb(0, 0, 0, 0));
+        Scene newScene = new Scene(layout, 1200, 600, Color.rgb(0, 0, 0, 0));
 
         // Create transparent stage
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
@@ -219,6 +220,11 @@ public class Tutorial34 extends Application {
         em.setPromptText("E-mail");
         em.setMaxWidth(300);
 
+        mobile = new TextField();
+        mobile.setFont(Font.font("SanSerif", 20));
+        mobile.setPromptText("Mobile No.");
+        mobile.setMaxWidth(300);
+
         un = new TextField();
         un.setFont(Font.font("SanSerif", 20));
         un.setPromptText("UserName");
@@ -252,7 +258,7 @@ public class Tutorial34 extends Application {
         save.setFont(Font.font("SanSerif", 15));
 
         save.setOnAction(e -> {
-            if (validateFields() && validateNumber()) {
+            if (validateFields() && validateNumber() && validateFirstLastName() && validateEmail() && validatePassword()) {
                 try {
                     String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,UserName,Password,DOB, gender) VALUES (?,?,?,?,?,?,?,?)";
                     preparedStatement = conn.prepareStatement(query);
@@ -284,7 +290,10 @@ public class Tutorial34 extends Application {
                 fillComboBox();
             }
         });
-        fields.getChildren().addAll(label1, id, fn, ln, em, un, pw, datePicker, male, female, save);
+        fields.getChildren().addAll(label1, id, fn, ln, em, mobile, un, pw, datePicker, male, female, save);
+        listView.setMaxSize(100, 250);
+        layout.setLeft(listView);
+        BorderPane.setMargin(listView, new Insets(10));
         layout.setCenter(fields);
         BorderPane.setMargin(fields, new Insets(0, 0, 0, 20));
 
@@ -326,7 +335,12 @@ public class Tutorial34 extends Application {
         column8.setMinWidth(60);
         column8.setCellValueFactory(new PropertyValueFactory<>("gender"));
 
-        tableView.getColumns().addAll(column1, column2, column3, column4, column5, column6, column7, column8);
+        TableColumn column9 = new TableColumn("Mobile");
+        column9.setMinWidth(60);
+        column9.setCellValueFactory(new PropertyValueFactory<>("mobile"));
+
+
+        tableView.getColumns().addAll(column1, column2, column3, column4, column5, column6, column7, column8, column9);
         //tableView.setTableMenuButtonVisible(true);
         layout.setRight(tableView);
         BorderPane.setMargin(tableView, new Insets(0, 10, 10, 0));
@@ -396,6 +410,58 @@ public class Tutorial34 extends Application {
 
         });
 
+        listView.setOnMouseClicked(e -> {
+            String query = "SELECT * FROM UserTable WHERE FirstName = ?";
+
+            try {
+                preparedStatement = conn.prepareStatement(query);
+                preparedStatement.setString(1, (String) listView.getSelectionModel().getSelectedItem());
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    id.setText(resultSet.getString("ID"));
+                    fn.setText(resultSet.getString("FirstName"));
+                    ln.setText(resultSet.getString("LastName"));
+                    em.setText(resultSet.getString("Email"));
+                    un.setText(resultSet.getString("UserName"));
+                    pw.setText(resultSet.getString("Password"));
+                    ((TextField) datePicker.getEditor()).setText(resultSet.getString("DOB"));
+//                    if ("Male".equals(resultSet.getString("Gender"))) {
+//                        male.setSelected(true);
+//                    } else if ("Female".equals(resultSet.getString("Gender"))) {
+//                        female.setSelected(true);
+//                    } else {
+//
+//                        male.setSelected(false);
+//                        female.setSelected(false);
+//                    }
+
+                    //SWITCH Retrieve data into comboBox
+                    if (null != resultSet.getString("Gender")) switch (resultSet.getString("gender")) {
+                        case "Male":
+                            male.setSelected(true);
+                            break;
+                        case "Female":
+                            female.setSelected(true);
+                            break;
+                        default:
+                            male.setSelected(false);
+                            female.setSelected(false);
+                            break;
+                    }
+                    else {
+                        male.setSelected(false);
+                        female.setSelected(false);
+                    }
+                }
+                preparedStatement.close();
+                resultSet.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+        });
+
         Button delete = new Button("Delete User");
         delete.setFont(Font.font("SanSerif", 15));
         delete.setOnAction(e -> {
@@ -406,21 +472,22 @@ public class Tutorial34 extends Application {
             alert.setContentText("سيتم حذف أسم مستخدم!!!");
             Optional<ButtonType> action = alert.showAndWait();
             if (action.get() == ButtonType.OK) {
-//                if (validateFields()) {
-                try {
-                    String query = "DELETE FROM UserTable WHERE id = ?";
-                    preparedStatement = conn.prepareStatement(query);
-                    preparedStatement.setString(1, id.getText());
-                    preparedStatement.executeUpdate();
-                    preparedStatement.close();
-                } catch (SQLException throwables) {
-                    System.out.println(throwables);
+                if (validateFields()) {
+                    try {
+                        String query = "DELETE FROM UserTable WHERE id = ?";
+                        preparedStatement = conn.prepareStatement(query);
+                        preparedStatement.setString(1, id.getText());
+                        preparedStatement.executeUpdate();
+                        preparedStatement.close();
+                    } catch (SQLException throwables) {
+                        System.out.println(throwables);
+                    }
+                    clearField();
+                    fillComboBox();
+                    load();
                 }
-                clearField();
-                fillComboBox();
-                load();
             }
-//            }
+
         });
 
         HBox hBox = new HBox(5);
@@ -446,6 +513,7 @@ public class Tutorial34 extends Application {
                         resultSet.getString("firstName"),
                         resultSet.getString("LastName"),
                         resultSet.getString("Email"),
+                        resultSet.getString("Mobile"),
                         resultSet.getString("UserName"),
                         resultSet.getString("Password"),
                         resultSet.getString("DOB"),
@@ -483,30 +551,77 @@ public class Tutorial34 extends Application {
     }
 
     private boolean validateNumber() {
-        Pattern pattern = Pattern.compile("[0 - 9] +");
+        Pattern pattern = Pattern.compile("[0-9]+");
         Matcher matcher = pattern.matcher(id.getText());
         if (matcher.find() && matcher.group().equals(id.getText())) {
             return true;
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Validate Nubmber");
+            alert.setTitle("Validate Number");
             alert.setHeaderText(null);
-            alert.setContentText("الرجاء ادخال رقم لتسلسل المستخدم!");
+            alert.setContentText("Please Enter Valid Number");
+            alert.showAndWait();
             return false;
         }
     }
+
+    private boolean validateFirstLastName() {
+        Pattern pattern = Pattern.compile("[a-zA-Z]+");
+        Matcher matcher = pattern.matcher(fn.getText());
+        Matcher matcher1 = pattern.matcher(ln.getText());
+        if ((matcher.find() && matcher.group().equals(fn.getText())) && (matcher1.find() && matcher1.group().equals(ln.getText()))) {
+            return true;
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Validate First and Last Name");
+            alert.setHeaderText(null);
+            alert.setContentText("Please enter valid first name and last name");
+            alert.showAndWait();
+            return false;
+        }
+    }
+
+    private boolean validateEmail() {
+        Pattern pattern = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9._]*@[a-zA-Z0-9]+([.][a-zA-Z]+)+");
+        Matcher matcher = pattern.matcher(em.getText());
+        if (matcher.find() && matcher.group().equals(em.getText())) {
+            return true;
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Validate E-Mail");
+            alert.setHeaderText(null);
+            alert.setContentText("Please Enter Valid E-Mail");
+            alert.showAndWait();
+            return false;
+        }
+    }
+
+    private boolean validatePassword() {
+        Pattern pattern = Pattern.compile("((?=.*\\d)(?=.[a-z])(?=.*[A-Z])(?=.*[@#$%]).{6,15})");
+        Matcher matcher = pattern.matcher(pw.getText());
+        if (matcher.matches()) {
+            return true;
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Validate Password");
+            alert.setHeaderText(null);
+            alert.setContentText("Please Enter Valid Password");
+            alert.showAndWait();
+            return false;
+        }
+    }
+
 
     private boolean validateFields() {
         Alert warning = new Alert(Alert.AlertType.WARNING);
         warning.setTitle("Empty fields");
         warning.setHeaderText(null);
-        if (
-//                id.getText().isEmpty() |
-                        fn.getText().isEmpty() |
-                        ln.getText().isEmpty() |
-                        em.getText().isEmpty() |
-                        un.getText().isEmpty() |
-                        pw.getText().isEmpty()
+        if (id.getText().isEmpty() |
+                fn.getText().isEmpty() |
+                ln.getText().isEmpty() |
+                em.getText().isEmpty() |
+                un.getText().isEmpty() |
+                pw.getText().isEmpty()
         ) {
             warning.setContentText("Empty Fields");
             warning.showAndWait();

@@ -39,6 +39,7 @@ public class Tutorial33 extends Application {
     private RadioButton male;
     private RadioButton female;
     private String radioButtonLabel;
+    private ListView listView = new ListView(options);
 
     @Override
     public void start(Stage primaryStage) {
@@ -48,7 +49,7 @@ public class Tutorial33 extends Application {
         CheckConnection();
         fillComboBox();
         BorderPane layout = new BorderPane();
-        Scene newScene = new Scene(layout, 1000, 600, Color.rgb(0, 0, 0, 0));
+        Scene newScene = new Scene(layout, 1200, 600, Color.rgb(0, 0, 0, 0));
 
         // Create transparent stage
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
@@ -283,6 +284,9 @@ public class Tutorial33 extends Application {
             }
         });
         fields.getChildren().addAll(label1, id, fn, ln, em, un, pw, datePicker, male, female, save);
+        listView.setMaxSize(100, 250);
+        layout.setLeft(listView);
+        BorderPane.setMargin(listView, new Insets(10));
         layout.setCenter(fields);
         BorderPane.setMargin(fields, new Insets(0, 0, 0, 20));
 
@@ -394,6 +398,58 @@ public class Tutorial33 extends Application {
 
         });
 
+        listView.setOnMouseClicked(e -> {
+            String query = "SELECT * FROM UserTable WHERE FirstName = ?";
+
+            try {
+                preparedStatement = conn.prepareStatement(query);
+                preparedStatement.setString(1, (String) listView.getSelectionModel().getSelectedItem());
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    id.setText(resultSet.getString("ID"));
+                    fn.setText(resultSet.getString("FirstName"));
+                    ln.setText(resultSet.getString("LastName"));
+                    em.setText(resultSet.getString("Email"));
+                    un.setText(resultSet.getString("UserName"));
+                    pw.setText(resultSet.getString("Password"));
+                    ((TextField) datePicker.getEditor()).setText(resultSet.getString("DOB"));
+//                    if ("Male".equals(resultSet.getString("Gender"))) {
+//                        male.setSelected(true);
+//                    } else if ("Female".equals(resultSet.getString("Gender"))) {
+//                        female.setSelected(true);
+//                    } else {
+//
+//                        male.setSelected(false);
+//                        female.setSelected(false);
+//                    }
+
+                    //SWITCH Retrieve data into comboBox
+                    if (null != resultSet.getString("Gender")) switch (resultSet.getString("gender")) {
+                        case "Male":
+                            male.setSelected(true);
+                            break;
+                        case "Female":
+                            female.setSelected(true);
+                            break;
+                        default:
+                            male.setSelected(false);
+                            female.setSelected(false);
+                            break;
+                    }
+                    else {
+                        male.setSelected(false);
+                        female.setSelected(false);
+                    }
+                }
+                preparedStatement.close();
+                resultSet.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+        });
+
         Button delete = new Button("Delete User");
         delete.setFont(Font.font("SanSerif", 15));
         delete.setOnAction(e -> {
@@ -445,6 +501,7 @@ public class Tutorial33 extends Application {
                         resultSet.getString("firstName"),
                         resultSet.getString("LastName"),
                         resultSet.getString("Email"),
+                        resultSet.getString("Mobile"),
                         resultSet.getString("UserName"),
                         resultSet.getString("Password"),
                         resultSet.getString("DOB"),
