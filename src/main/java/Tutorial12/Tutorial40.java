@@ -22,11 +22,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Tutorial38 extends Application {
+public class Tutorial40 extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
@@ -35,17 +37,20 @@ public class Tutorial38 extends Application {
     TextField id, fn, ln, em, mobile, un;
     PasswordField pw;
     DatePicker datePicker;
+
     final ObservableList options = FXCollections.observableArrayList();
-    TableView<User2> tableView = new TableView<>();
-    final ObservableList<User2> data = FXCollections.observableArrayList();
+    TableView<User3> tableView = new TableView<>();
+    final ObservableList<User3> data = FXCollections.observableArrayList();
     private RadioButton male;
     private RadioButton female;
     private String radioButtonLabel;
     private ListView listView = new ListView(options);
+    private CheckBox checkBox1, checkBox2, checkBox3;
+    ObservableList<String> checkBoxList = FXCollections.observableArrayList();
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tut 38 - Mobile Number Validation");
+        primaryStage.setTitle("JavaFX 8 Tut 40 - CheckBox and Database");
 
 
         CheckConnection();
@@ -254,13 +259,34 @@ public class Tutorial38 extends Application {
         });
 //        gender.getToggles().addAll(male, female);
 
+        checkBox1 = new CheckBox("Playing");
+        checkBox1.setOnAction(e -> {
+            checkBoxList.add(checkBox1.getText());
+        });
+        checkBox2 = new CheckBox("Singing");
+        checkBox2.setOnAction(e -> {
+            checkBoxList.add(checkBox2.getText());
+        });
+        checkBox3 = new CheckBox("Dancing");
+        checkBox3.setOnAction(e -> {
+            checkBoxList.add(checkBox3.getText());
+        });
+
+
+        datePicker.requestFocus();
+        male.requestFocus();
+        female.requestFocus();
+        checkBox1.requestFocus();
+        checkBox2.requestFocus();
+        checkBox3.requestFocus();
+        clear.requestFocus();
         Button save = new Button("Save");
         save.setFont(Font.font("SanSerif", 15));
 
         save.setOnAction(e -> {
             if (validateFields() && validateNumber() && validateFirstLastName() && validateEmail() && validatePassword() && validateMobile()) {
                 try {
-                    String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,Mobile,UserName,Password,DOB, gender) VALUES (?,?,?,?,?,?,?,?,?)";
+                    String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,Mobile,UserName,Password,DOB, gender, Hobbies) VALUES (?,?,?,?,?,?,?,?,?,?)";
                     preparedStatement = conn.prepareStatement(query);
                     preparedStatement.setString(1, id.getText());
                     preparedStatement.setString(2, fn.getText());
@@ -271,6 +297,7 @@ public class Tutorial38 extends Application {
                     preparedStatement.setString(7, pw.getText());
                     preparedStatement.setString(8, ((TextField) datePicker.getEditor()).getText());
                     preparedStatement.setString(9, radioButtonLabel);
+                    preparedStatement.setString(10, checkBoxList.toString());
                     preparedStatement.execute();
                     clearField();
 
@@ -297,7 +324,8 @@ public class Tutorial38 extends Application {
         update.setOnAction(e -> {
             if (validateFields() && validateNumber() && validateFirstLastName() && validateEmail() && validatePassword() && validateMobile()) {
                 try {
-                    String query = "UPDATE UserTable set ID=?, FirstName=?,LastName=?,Email=?,Mobile=?,UserName=?,Password=?,DOB=?, gender=? WHERE ID ='" + id.getText() + "'";
+                    String query = "UPDATE UserTable set ID=?, FirstName=?,LastName=?,Email=?,Mobile=?,UserName=?,Password=?,DOB=?, gender=?, hobbies = ? WHERE ID ='" + id.getText() + "'";
+
                     preparedStatement = conn.prepareStatement(query);
                     preparedStatement.setString(1, id.getText());
                     preparedStatement.setString(2, fn.getText());
@@ -308,6 +336,9 @@ public class Tutorial38 extends Application {
                     preparedStatement.setString(7, pw.getText());
                     preparedStatement.setString(8, ((TextField) datePicker.getEditor()).getText());
                     preparedStatement.setString(9, radioButtonLabel);
+
+                    preparedStatement.setString(10, checkBoxList.toString());
+                    System.out.println(checkBoxList.toString());
                     preparedStatement.execute();
                     clearField();
 
@@ -330,7 +361,7 @@ public class Tutorial38 extends Application {
         });
 
 
-        fields.getChildren().addAll(label1, id, fn, ln, em, mobile, un, pw, datePicker, male, female, save);
+        fields.getChildren().addAll(label1, id, fn, ln, em, mobile, un, pw, datePicker, male, female, checkBox1, checkBox2, checkBox3, save);
         listView.setMaxSize(100, 250);
         layout.setLeft(listView);
         BorderPane.setMargin(listView, new Insets(10));
@@ -379,7 +410,11 @@ public class Tutorial38 extends Application {
         column9.setMaxWidth(110);
         column9.setCellValueFactory(new PropertyValueFactory<>("mobile"));
 
-        tableView.getColumns().addAll(column1, column2, column3, column4, column5, column6, column7, column8, column9);
+        TableColumn column10 = new TableColumn("Hobbies");
+        column10.setMinWidth(120);
+        column10.setCellValueFactory(new PropertyValueFactory<>("Hobbies"));
+
+        tableView.getColumns().addAll(column1, column2, column3, column4, column5, column6, column7, column8, column9, column10);
         tableView.setTableMenuButtonVisible(true);
         layout.setRight(tableView);
         BorderPane.setMargin(tableView, new Insets(0, 10, 10, 0));
@@ -441,6 +476,49 @@ public class Tutorial38 extends Application {
                         male.setSelected(false);
                         female.setSelected(false);
                     }
+
+                    //Retrieve Hobbies Into CheckBox
+                    if (resultSet.getString("hobbies") != null) {
+                        checkBox1.setSelected(false);
+                        checkBox2.setSelected(false);
+                        checkBox3.setSelected(false);
+
+                        //hobbies in this string format - [Playing, Dancing]
+                        System.out.println(resultSet.getString("hobbies"));
+
+                        String checkBoxString = resultSet.getString("hobbies").replace("[", "").replace("]", "");
+                        System.out.println(checkBoxString);
+
+                        //now can convert to a list, strip out commas and spaces
+                        List<String> hobbyList = Arrays.asList(checkBoxString.split("\\s*,\\s*"));
+                        System.out.println(hobbyList);
+
+                        for (String hobby : hobbyList) {
+                            switch (hobby) {
+                                case "Playing":
+                                    checkBox1.setSelected(true);
+                                    break;
+                                case "Singing":
+                                    checkBox2.setSelected(true);
+                                    break;
+
+                                case "Dancing":
+                                    checkBox3.setSelected(true);
+                                    break;
+                                default:
+                                    checkBox1.setSelected(false);
+                                    checkBox2.setSelected(false);
+                                    checkBox3.setSelected(false);
+                                    break;
+                            }
+                        }
+                    } else {
+                        checkBox1.setSelected(false);
+                        checkBox2.setSelected(false);
+                        checkBox3.setSelected(false);
+                    }
+
+
                 }
                 preparedStatement.close();
                 resultSet.close();
@@ -466,6 +544,7 @@ public class Tutorial38 extends Application {
                     mobile.setText(resultSet.getString("Mobile"));
                     un.setText(resultSet.getString("UserName"));
                     pw.setText(resultSet.getString("Password"));
+
                     ((TextField) datePicker.getEditor()).setText(resultSet.getString("DOB"));
 //                    if ("Male".equals(resultSet.getString("Gender"))) {
 //                        male.setSelected(true);
@@ -549,7 +628,7 @@ public class Tutorial38 extends Application {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                data.add(new User2(
+                data.add(new User3(
                         resultSet.getInt("id"),
                         resultSet.getString("firstName"),
                         resultSet.getString("LastName"),
@@ -558,7 +637,8 @@ public class Tutorial38 extends Application {
                         resultSet.getString("UserName"),
                         resultSet.getString("Password"),
                         resultSet.getString("DOB"),
-                        resultSet.getString("gender")
+                        resultSet.getString("gender"),
+                        resultSet.getString("hobbies")
 
 
                 ));
@@ -669,6 +749,7 @@ public class Tutorial38 extends Application {
     }
 
 
+
     private boolean validateFields() {
         Alert warning = new Alert(Alert.AlertType.WARNING);
         warning.setTitle("Empty fields");
@@ -677,7 +758,7 @@ public class Tutorial38 extends Application {
                 fn.getText().isEmpty() |
                 ln.getText().isEmpty() |
                 em.getText().isEmpty() |
-                mobile.getText().isEmpty()|
+                mobile.getText().isEmpty() |
                 un.getText().isEmpty() |
                 pw.getText().isEmpty()
         ) {
@@ -687,6 +768,11 @@ public class Tutorial38 extends Application {
         }
         if (datePicker.getEditor().getText().isEmpty()) {
             warning.setContentText("please enter date of birth in (dd/mm/yyyy) format");
+            warning.showAndWait();
+            return false;
+        }
+        if (!(checkBox1.isSelected() | checkBox2.isSelected() | checkBox3.isSelected())) {
+            warning.setContentText("please select one of the hobbies");
             warning.showAndWait();
             return false;
         }
@@ -709,6 +795,10 @@ public class Tutorial38 extends Application {
         ((TextField) datePicker.getEditor()).setText(null);
         male.setSelected(false);
         female.setSelected(false);
+        checkBox1.setSelected(false);
+        checkBox2.setSelected(false);
+        checkBox3.setSelected(false);
+
 //        datePicker.setValue(null);
     }
 

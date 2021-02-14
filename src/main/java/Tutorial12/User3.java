@@ -2,7 +2,7 @@ package Tutorial12;
 
 import javafx.beans.property.SimpleObjectProperty;
 
-public class User2 {
+public class User3 {
 
     private final SimpleObjectProperty id;
     private final SimpleObjectProperty firstName;
@@ -13,9 +13,10 @@ public class User2 {
     private final SimpleObjectProperty password;
     private final SimpleObjectProperty DOB;
     private final SimpleObjectProperty gender;
+    private final SimpleObjectProperty hobbies;
 
 
-    public User2(int id, String firstName, String lastName, String email, String mobile, String userName, String password, String DOB, String gender) {
+    public User3(int id, String firstName, String lastName, String email, String mobile, String userName, String password, String DOB, String gender, String hobbies) {
         this.id = new SimpleObjectProperty(id);
         this.firstName = new SimpleObjectProperty(firstName);
         this.lastName = new SimpleObjectProperty(lastName);
@@ -25,6 +26,7 @@ public class User2 {
         this.password = new SimpleObjectProperty(password);
         this.DOB = new SimpleObjectProperty(DOB);
         this.gender = new SimpleObjectProperty(gender);
+        this.hobbies = new SimpleObjectProperty(hobbies);
     }
 
 
@@ -64,6 +66,10 @@ public class User2 {
         return gender.get();
     }
 
+    public Object getHobbies() {
+        return hobbies.get();
+    }
+
 
     public void setFirstName(String firstName) {
         this.firstName.set(firstName);
@@ -99,5 +105,9 @@ public class User2 {
 
     public void setGender(String gender) {
         this.gender.set(gender);
+    }
+
+    public void setHobbies(String hobbies) {
+        this.hobbies.set(hobbies);
     }
 }
