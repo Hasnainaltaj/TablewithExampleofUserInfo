@@ -478,79 +478,47 @@ public class Tutorial40 extends Application {
                     }
 
                     /**Retrieve Hobbies Into CheckBox*/
-//                    if (resultSet.getString("hobbies") != null) {
-//                        checkBox1.setSelected(false);
-//                        checkBox2.setSelected(false);
-//                        checkBox3.setSelected(false);
-//
-//                        //hobbies in this string format - [Playing, Dancing]
-//                        System.out.println(resultSet.getString("hobbies"));
-//
-//                        String checkBoxString = resultSet.getString("hobbies").replace("[", "").replace("]", "");
-//                        System.out.println(checkBoxString);
-//
-//                        //now can convert to a list, strip out commas and spaces
-//                        List<String> hobbyList = Arrays.asList(checkBoxString.split("\\s*,\\s*"));
-//                        System.out.println(hobbyList);
-//
-//                        for (String hobby : hobbyList) {
-//                            switch (hobby) {
-//                                case "Playing":
-//                                    checkBox1.setSelected(true);
-//                                    break;
-//                                case "Singing":
-//                                    checkBox2.setSelected(true);
-//                                    break;
-//
-//                                case "Dancing":
-//                                    checkBox3.setSelected(true);
-//                                    break;
-//                                default:
-//                                    checkBox1.setSelected(false);
-//                                    checkBox2.setSelected(false);
-//                                    checkBox3.setSelected(false);
-//                                    break;
-//                            }
-//                        }
-//                    } else {
-//                        checkBox1.setSelected(false);
-//                        checkBox2.setSelected(false);
-//                        checkBox3.setSelected(false);
-//                    }
-
-                    if(resultSet.getString("Hobbies")!= null){
+                    if (resultSet.getString("hobbies") != null) {
                         checkBox1.setSelected(false);
                         checkBox2.setSelected(false);
                         checkBox3.setSelected(false);
 
-                        //hobbies in the string formate - [Playing , Dancing]
-                        System.out.println(resultSet.getString("Hobbies"));
+                        //hobbies in this string format - [Playing, Dancing]
+                        System.out.println(resultSet.getString("hobbies"));
 
-                        String checkBoxString = resultSet.getString("Hobbies").replace("[", "").replace("]", "");
+                        String checkBoxString = resultSet.getString("hobbies").replace("[", "").replace("]", "");
                         System.out.println(checkBoxString);
 
-                        //now can converert to a list, strip out commas and spaces
-                        List<String> hobbylist = Arrays.asList(checkBoxString.split("\\s*,\\s*"));
-                        System.out.println(hobbylist);
+                        //now can convert to a list, strip out commas and spaces
+                        List<String> hobbyList = Arrays.asList(checkBoxString.split("\\s*,\\s*"));
+                        System.out.println(hobbyList);
 
-                        for(String hobby : hobbylist){
-                            switch(hobby){
-                                case "Playing" : checkBox1.setSelected(true);
+                        for (String hobby : hobbyList) {
+                            switch (hobby) {
+                                case "Playing":
+                                    checkBox1.setSelected(true);
                                     break;
-                                case "Singing" : checkBox2.setSelected(true);
+                                case "Singing":
+                                    checkBox2.setSelected(true);
                                     break;
-                                case "Dancing" : checkBox3.setSelected(true);
+
+                                case "Dancing":
+                                    checkBox3.setSelected(true);
                                     break;
-                                default        : checkBox1.setSelected(false);
+                                default:
+                                    checkBox1.setSelected(false);
                                     checkBox2.setSelected(false);
                                     checkBox3.setSelected(false);
+                                    break;
                             }
                         }
-                    }else{
+                    } else {
                         checkBox1.setSelected(false);
                         checkBox2.setSelected(false);
                         checkBox3.setSelected(false);
                     }
+
+
                     /**End of Retrieve checkbox*/
 
 
@@ -695,9 +663,11 @@ public class Tutorial40 extends Application {
             }
 
         });
-
-
         /** End of Table*/
+
+        /**Fetch Database Values on Table KeyReleased Method*/
+
+        /**End of Table KeyReleased Method*/
 
 
         HBox hBox = new HBox(5);
