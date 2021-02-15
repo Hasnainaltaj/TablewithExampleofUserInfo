@@ -56,7 +56,7 @@ public class Tutorial40 extends Application {
         CheckConnection();
         fillComboBox();
         BorderPane layout = new BorderPane();
-        Scene newScene = new Scene(layout, 1200, 600, Color.rgb(0, 0, 0, 0));
+        Scene newScene = new Scene(layout, 1200, 800, Color.rgb(0, 0, 0, 0));
 
         // Create transparent stage
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
@@ -477,46 +477,81 @@ public class Tutorial40 extends Application {
                         female.setSelected(false);
                     }
 
-                    //Retrieve Hobbies Into CheckBox
-                    if (resultSet.getString("hobbies") != null) {
+                    /**Retrieve Hobbies Into CheckBox*/
+//                    if (resultSet.getString("hobbies") != null) {
+//                        checkBox1.setSelected(false);
+//                        checkBox2.setSelected(false);
+//                        checkBox3.setSelected(false);
+//
+//                        //hobbies in this string format - [Playing, Dancing]
+//                        System.out.println(resultSet.getString("hobbies"));
+//
+//                        String checkBoxString = resultSet.getString("hobbies").replace("[", "").replace("]", "");
+//                        System.out.println(checkBoxString);
+//
+//                        //now can convert to a list, strip out commas and spaces
+//                        List<String> hobbyList = Arrays.asList(checkBoxString.split("\\s*,\\s*"));
+//                        System.out.println(hobbyList);
+//
+//                        for (String hobby : hobbyList) {
+//                            switch (hobby) {
+//                                case "Playing":
+//                                    checkBox1.setSelected(true);
+//                                    break;
+//                                case "Singing":
+//                                    checkBox2.setSelected(true);
+//                                    break;
+//
+//                                case "Dancing":
+//                                    checkBox3.setSelected(true);
+//                                    break;
+//                                default:
+//                                    checkBox1.setSelected(false);
+//                                    checkBox2.setSelected(false);
+//                                    checkBox3.setSelected(false);
+//                                    break;
+//                            }
+//                        }
+//                    } else {
+//                        checkBox1.setSelected(false);
+//                        checkBox2.setSelected(false);
+//                        checkBox3.setSelected(false);
+//                    }
+
+                    if(resultSet.getString("Hobbies")!= null){
                         checkBox1.setSelected(false);
                         checkBox2.setSelected(false);
                         checkBox3.setSelected(false);
 
-                        //hobbies in this string format - [Playing, Dancing]
-                        System.out.println(resultSet.getString("hobbies"));
+                        //hobbies in the string formate - [Playing , Dancing]
+                        System.out.println(resultSet.getString("Hobbies"));
 
-                        String checkBoxString = resultSet.getString("hobbies").replace("[", "").replace("]", "");
+                        String checkBoxString = resultSet.getString("Hobbies").replace("[", "").replace("]", "");
                         System.out.println(checkBoxString);
 
-                        //now can convert to a list, strip out commas and spaces
-                        List<String> hobbyList = Arrays.asList(checkBoxString.split("\\s*,\\s*"));
-                        System.out.println(hobbyList);
+                        //now can converert to a list, strip out commas and spaces
+                        List<String> hobbylist = Arrays.asList(checkBoxString.split("\\s*,\\s*"));
+                        System.out.println(hobbylist);
 
-                        for (String hobby : hobbyList) {
-                            switch (hobby) {
-                                case "Playing":
-                                    checkBox1.setSelected(true);
+                        for(String hobby : hobbylist){
+                            switch(hobby){
+                                case "Playing" : checkBox1.setSelected(true);
                                     break;
-                                case "Singing":
-                                    checkBox2.setSelected(true);
+                                case "Singing" : checkBox2.setSelected(true);
                                     break;
-
-                                case "Dancing":
-                                    checkBox3.setSelected(true);
+                                case "Dancing" : checkBox3.setSelected(true);
                                     break;
-                                default:
-                                    checkBox1.setSelected(false);
+                                default        : checkBox1.setSelected(false);
                                     checkBox2.setSelected(false);
                                     checkBox3.setSelected(false);
-                                    break;
                             }
                         }
-                    } else {
+                    }else{
                         checkBox1.setSelected(false);
                         checkBox2.setSelected(false);
                         checkBox3.setSelected(false);
                     }
+                    /**End of Retrieve checkbox*/
 
 
                 }
@@ -527,6 +562,7 @@ public class Tutorial40 extends Application {
             }
 
         });
+
 
         listView.setOnMouseClicked(e -> {
             String query = "SELECT * FROM UserTable WHERE FirstName = ?";
@@ -610,6 +646,60 @@ public class Tutorial40 extends Application {
 
         });
 
+
+        /** Table View By Click fetch data*/
+        tableView.setOnMouseClicked(e -> {
+
+
+            try {
+                User3 user = (User3) tableView.getSelectionModel().getSelectedItem();
+                String query = "SELECT * FROM UserTable WHERE ID = ?";
+                preparedStatement = conn.prepareStatement(query);
+                preparedStatement.setString(1, user.getId());
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    id.setText(resultSet.getString("ID"));
+                    fn.setText(resultSet.getString("FirstName"));
+                    ln.setText(resultSet.getString("LastName"));
+                    em.setText(resultSet.getString("Email"));
+                    mobile.setText(resultSet.getString("Mobile"));
+                    un.setText(resultSet.getString("UserName"));
+                    pw.setText(resultSet.getString("Password"));
+
+                    ((TextField) datePicker.getEditor()).setText(resultSet.getString("DOB"));
+
+
+                    //SWITCH Retrieve data into comboBox
+                    if (null != resultSet.getString("Gender")) switch (resultSet.getString("gender")) {
+                        case "Male":
+                            male.setSelected(true);
+                            break;
+                        case "Female":
+                            female.setSelected(true);
+                            break;
+                        default:
+                            male.setSelected(false);
+                            female.setSelected(false);
+                            break;
+                    }
+                    else {
+                        male.setSelected(false);
+                        female.setSelected(false);
+                    }
+                }
+                preparedStatement.close();
+                resultSet.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+        });
+
+
+        /** End of Table*/
+
+
         HBox hBox = new HBox(5);
         hBox.getChildren().addAll(load, comboBox, clear, update, delete);
 //        fields.getChildren().add(hBox);
@@ -629,7 +719,7 @@ public class Tutorial40 extends Application {
 
             while (resultSet.next()) {
                 data.add(new User3(
-                        resultSet.getInt("id"),
+                        resultSet.getString("id"),
                         resultSet.getString("firstName"),
                         resultSet.getString("LastName"),
                         resultSet.getString("Email"),
@@ -747,7 +837,6 @@ public class Tutorial40 extends Application {
             return false;
         }
     }
-
 
 
     private boolean validateFields() {
