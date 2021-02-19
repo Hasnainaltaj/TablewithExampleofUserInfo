@@ -9,8 +9,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -18,8 +25,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.awt.*;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,7 +45,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Tutorial40 extends Application {
+public class ImageAndDataBase extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
@@ -42,8 +56,8 @@ public class Tutorial40 extends Application {
     DatePicker datePicker;
 
     final ObservableList options = FXCollections.observableArrayList();
-    TableView<User3> tableView = new TableView<>();
-    final ObservableList<User3> data = FXCollections.observableArrayList();
+    TableView<User4> tableView = new TableView<>();
+    final ObservableList<User4> data = FXCollections.observableArrayList();
     private RadioButton male;
     private RadioButton female;
     private String radioButtonLabel;
@@ -51,13 +65,25 @@ public class Tutorial40 extends Application {
     private CheckBox checkBox1, checkBox2, checkBox3;
     ObservableList<String> checkBoxList = FXCollections.observableArrayList();
 
+    private FileChooser fileChooser;
+    private Button browse;
+    private File file;
+    private final Desktop desktop = Desktop.getDesktop();
+    private TextArea textArea;
+    private ImageView imageView;
+    private Image image;
+    private Button exportToExcel;
+    private Button importToExcel;
+
+    private FileInputStream fis;
+
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tut 40 - CheckBox and Database");
-
+        primaryStage.setTitle("JavaFX 8 Tut 46 - FileChooser");
 
         CheckConnection();
         fillComboBox();
+
         BorderPane layout = new BorderPane();
         Scene newScene = new Scene(layout, 1200, 800, Color.rgb(0, 0, 0, 0));
 
@@ -217,7 +243,7 @@ public class Tutorial40 extends Application {
 
         searchField = new TextField();
         searchField.setFont(Font.font("SanSerif", 20));
-        searchField.setPromptText("ID");
+        searchField.setPromptText("Search Field");
         searchField.setMaxWidth(200);
 
 
@@ -229,7 +255,7 @@ public class Tutorial40 extends Application {
         ln = new TextField();
         ln.setFont(Font.font("SanSerif", 20));
         ln.setPromptText("Last Name");
-        ln.setMaxWidth(300);
+        ln.setMaxWidth(200);
 
         em = new TextField();
         em.setFont(Font.font("SanSerif", 20));
@@ -290,14 +316,67 @@ public class Tutorial40 extends Application {
         checkBox1.requestFocus();
         checkBox2.requestFocus();
         checkBox3.requestFocus();
-        clear.requestFocus();
+        //clear.requestFocus();
+
+        textArea = new TextArea();
+        textArea.setFont(Font.font("SanSerif", 12));
+        textArea.setPromptText("Path of Selected File or Files");
+        textArea.setPrefSize(300, 50);
+        textArea.setEditable(false);
+
+
+        fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.png", "*.jpg", "*.gif"),
+                new FileChooser.ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.acc"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+
+        browse = new Button("Browse");
+        browse.setFont(Font.font("SanSerif", 15));
+        browse.setOnAction(e -> {
+
+            //Single File Selection
+            file = fileChooser.showOpenDialog(primaryStage);
+            if (file != null) {
+
+                //desktop.open(file);
+                textArea.setText(file.getAbsolutePath());
+                image = new Image(file.toURI().toString(), 100, 150, true, true); // path, PrefWidth, PrefHeight, PreserveRatio, smooth
+                imageView = new ImageView(image);
+                imageView.setFitWidth(100);
+                imageView.setFitHeight(150);
+                imageView.setPreserveRatio(true);
+
+                layout.setCenter(imageView);
+                BorderPane.setAlignment(imageView, Pos.TOP_LEFT);
+
+            }
+
+
+
+/*            //Multiple File Selection
+            List<File> fileList = fileChooser.showOpenMultipleDialog(primaryStage);
+            if (fileList != null) {
+                fileList.stream().forEach(selectedFile -> {
+                    try {
+                        desktop.open(selectedFile);
+                        textArea.setText(fileList.toString());
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                });
+            }*/
+        });
+
         Button save = new Button("Save");
         save.setFont(Font.font("SanSerif", 15));
 
         save.setOnAction(e -> {
             if (validateFields() && validateNumber() && validateFirstLastName() && validateEmail() && validatePassword() && validateMobile()) {
                 try {
-                    String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,Mobile,UserName,Password,DOB, gender, Hobbies) VALUES (?,?,?,?,?,?,?,?,?,?)";
+                    String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email,Mobile,UserName,Password,DOB, gender, Hobbies,Image) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
                     preparedStatement = conn.prepareStatement(query);
                     preparedStatement.setString(1, id.getText());
                     preparedStatement.setString(2, fn.getText());
@@ -309,6 +388,9 @@ public class Tutorial40 extends Application {
                     preparedStatement.setString(8, ((TextField) datePicker.getEditor()).getText());
                     preparedStatement.setString(9, radioButtonLabel);
                     preparedStatement.setString(10, checkBoxList.toString());
+                    /**Here we are saving the Image*/
+                    fis = new FileInputStream(file);
+                    preparedStatement.setBinaryStream(11, (InputStream) fis, (int) file.length());
                     preparedStatement.execute();
                     clearField();
 
@@ -341,7 +423,7 @@ public class Tutorial40 extends Application {
 //                    preparedStatement = conn.prepareStatement(delterQuery);
 //                    preparedStatement.execute();
 //                    preparedStatement.close();
-                    String query = "UPDATE UserTable set ID=?, FirstName=?,LastName=?,Email=?,Mobile=?,UserName=?,Password=?,DOB=?, gender=?, hobbies = ? WHERE ID ='" + id.getText() + "'";
+                    String query = "UPDATE UserTable set ID=?, FirstName=?,LastName=?,Email=?,Mobile=?,UserName=?,Password=?,DOB=?, gender=?, hobbies = ?,Image = ? WHERE ID ='" + id.getText() + "'";
                     System.out.println("We are here in update query");
                     preparedStatement = conn.prepareStatement(query);
                     preparedStatement.setString(1, id.getText());
@@ -353,9 +435,12 @@ public class Tutorial40 extends Application {
                     preparedStatement.setString(7, pw.getText());
                     preparedStatement.setString(8, ((TextField) datePicker.getEditor()).getText());
                     preparedStatement.setString(9, radioButtonLabel);
-
                     preparedStatement.setString(10, checkBoxList.toString());
                     System.out.println(checkBoxList.toString());
+
+                    fis = new FileInputStream(file);
+                    preparedStatement.setBinaryStream(11, (InputStream) fis, (int) file.length());
+
                     preparedStatement.execute();
                     clearField();
 
@@ -378,12 +463,12 @@ public class Tutorial40 extends Application {
         });
 
 
-        fields.getChildren().addAll(searchField, label1, id, fn, ln, em, mobile, un, pw, datePicker, male, female, checkBox1, checkBox2, checkBox3, save);
+        fields.getChildren().addAll(searchField, label1, id, fn, ln, em, mobile, un, pw, datePicker, male, female, checkBox1, checkBox2, checkBox3, browse, textArea, save);
         listView.setMaxSize(100, 250);
-        layout.setLeft(listView);
-        BorderPane.setMargin(listView, new Insets(10));
-        layout.setCenter(fields);
-        BorderPane.setMargin(fields, new Insets(0, 0, 0, 20));
+        //layout.setLeft(listView);
+        //BorderPane.setMargin(listView, new Insets(10));
+        layout.setLeft(fields);
+        BorderPane.setMargin(fields, new Insets(0, 10, 0, 10));
 
 
         TableColumn column1 = new TableColumn("ID");
@@ -555,7 +640,8 @@ public class Tutorial40 extends Application {
                 }
                 preparedStatement.close();
                 resultSet.close();
-            } catch (SQLException throwables) {
+            } catch (
+                    SQLException throwables) {
                 throwables.printStackTrace();
             }
 
@@ -650,7 +736,7 @@ public class Tutorial40 extends Application {
 
 
             try {
-                User3 user = (User3) tableView.getSelectionModel().getSelectedItem();
+                User4 user = (User4) tableView.getSelectionModel().getSelectedItem();
                 String query = "SELECT * FROM UserTable WHERE ID = ?";
                 preparedStatement = conn.prepareStatement(query);
                 preparedStatement.setString(1, user.getId());
@@ -725,9 +811,43 @@ public class Tutorial40 extends Application {
                         checkBox2.setSelected(false);
                         checkBox3.setSelected(false);
                     }
-
-
                     /**End of Retrieve checkbox*/
+
+                    /**Retrieve Image From the DataBase*/
+                    try {
+//if image is not null we will go for it
+                        if (resultSet.getBinaryStream("Image") != null) {
+                            InputStream inputStream = resultSet.getBinaryStream("Image");
+                            OutputStream outputStream = new FileOutputStream(new File("Photo.jpg"));
+                            byte[] content = new byte[1024];
+                            int size = 0;
+                            while ((size = inputStream.read(content)) != -1) {
+                                outputStream.write(content, 0, size);
+                            }
+                            outputStream.close();
+                            inputStream.close();
+                            image = new Image("file:photo.jpg", 100, 150, true, true);
+
+                            ImageView imageView1 = new ImageView(image);
+                            imageView1.setFitWidth(100);
+                            imageView1.setFitHeight(150);
+                            imageView1.setPreserveRatio(true);
+
+                            layout.setCenter(imageView1);
+                            BorderPane.setAlignment(imageView1, Pos.TOP_LEFT);
+                        } else {
+                            System.out.println("Image is " + resultSet.getBinaryStream("Image"));
+                        }
+
+
+                    } catch (FileNotFoundException fileNotFoundException) {
+                        System.out.println(fileNotFoundException);
+                    } catch (IOException ioException) {
+                        System.out.println(ioException);
+                    }
+                    /**End of Retrieve Image From the DataBase*/
+
+
                 }
                 preparedStatement.close();
                 resultSet.close();
@@ -744,7 +864,7 @@ public class Tutorial40 extends Application {
 
             if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
                 try {
-                    User3 user = (User3) tableView.getSelectionModel().getSelectedItem();
+                    User4 user = (User4) tableView.getSelectionModel().getSelectedItem();
                     String query = "SELECT * FROM UserTable WHERE ID = ?";
                     preparedStatement = conn.prepareStatement(query);
                     preparedStatement.setString(1, user.getId());
@@ -834,18 +954,115 @@ public class Tutorial40 extends Application {
         });
         /**End of Table KeyReleased Method*/
 
+        /**Start of Export to Excel Sheet*/
+        exportToExcel = new Button("Export To Excel");
+        exportToExcel.setFont(Font.font("SanSerif", 15));
+        exportToExcel.setOnAction(e -> {
+            String query = "Select * FROM UserTable";
+            try {
+                preparedStatement = conn.prepareStatement(query);
+                resultSet = preparedStatement.executeQuery();
+                //It is valid for 2007 and above version
+                XSSFWorkbook workbook = new XSSFWorkbook();
+                //for old version of Excel 2003 and earlier use
+                //HSSFWorkbook workbook1 = new HSSFWorkbook();
+
+                //Create a sheet
+                XSSFSheet sheet = workbook.createSheet("User Details");
+                XSSFRow header = sheet.createRow(0);
+                header.createCell(0).setCellValue("ID");
+                header.createCell(1).setCellValue("First Name");
+                header.createCell(2).setCellValue("Last Name");
+                header.createCell(3).setCellValue("E-mail");
+                int index = 1;
+                while (resultSet.next()) {
+                    XSSFRow row = sheet.createRow(index);
+                    row.createCell(0).setCellValue(resultSet.getString("ID"));
+                    row.createCell(1).setCellValue(resultSet.getString("FirstName"));
+                    row.createCell(2).setCellValue(resultSet.getString("LastName"));
+                    row.createCell(3).setCellValue(resultSet.getString("email"));
+
+                    sheet.autoSizeColumn(1);
+                    sheet.autoSizeColumn(2);
+                    sheet.setColumnWidth(3, 256 * 25);//256-character width
+                    sheet.setZoom(150);//150% is zoom scale
+                    index++;
+                }
+                FileOutputStream fileOutputStream = new FileOutputStream("UserData.xlsx"); // before 2007 version xls
+                workbook.write(fileOutputStream);
+                fileOutputStream.close();
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Information Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("User Details Exported to Excel sheet.");
+                alert.showAndWait();
+
+                preparedStatement.close();
+                resultSet.close();
+
+
+            } catch (SQLException | FileNotFoundException throwables) {
+                System.out.println(throwables);
+            } catch (IOException ioException) {
+                System.out.println(ioException);
+            }
+        });
+        /**End of Export to Excel*/
+
+        /**Start of Import Excel to Database*/
+        importToExcel = new Button("Import XL TO DB");
+        importToExcel.setFont(Font.font("SanSerif", 15));
+        importToExcel.setOnAction(e -> {
+            String query = "INSERT INTO UserTable (ID, FirstName,LastName,Email) VALUES (?,?,?,?)";
+            try {
+                preparedStatement = conn.prepareStatement(query);
+                FileInputStream fileInputStream = new FileInputStream(new File("UserInfo.xlsx"));
+                XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
+                XSSFSheet sheet = workbook.getSheetAt(0);
+                Row row;
+                for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                    row = sheet.getRow(i);
+                    preparedStatement.setInt(1, (int) row.getCell(0).getNumericCellValue());
+                    preparedStatement.setString(2, row.getCell(1).getStringCellValue());
+                    preparedStatement.setString(3, row.getCell(2).getStringCellValue());
+                    preparedStatement.setString(4, row.getCell(3).getStringCellValue());
+                    preparedStatement.execute();
+
+                    workbook.close();
+                    fileInputStream.close();
+                    preparedStatement.close();
+                    resultSet.close();
+                }
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Information Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("User Details Imported From Excel sheet to DataBase.");
+                alert.showAndWait();
+
+
+            } catch (SQLException | FileNotFoundException throwables) {
+                System.out.println(throwables);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+
+
+        });
+        /**End of Import Excel to Database*/
+
 
         HBox hBox = new HBox(5);
-        hBox.getChildren().addAll(load, comboBox, clear, update, delete);
+        hBox.getChildren().addAll(load, comboBox, clear, update, delete, exportToExcel, importToExcel);
 //        fields.getChildren().add(hBox);
         layout.setBottom(hBox);
         BorderPane.setMargin(hBox, new Insets(10));
 
         /** Start of Search or Filter Table By ID, FirstName and LastName*/
-        FilteredList<User3> filteredData = new FilteredList<>(data, e -> true);
+        FilteredList<User4> filteredData = new FilteredList<>(data, e -> true);
         searchField.setOnKeyReleased(e -> {
             searchField.textProperty().addListener((observableValue, oldValue, newValue) -> {
-                filteredData.setPredicate((Predicate<? super User3>) user -> {
+                filteredData.setPredicate((Predicate<? super User4>) user -> {
                     if (newValue == null || newValue.isEmpty()) {
                         return true;
                     }
@@ -859,7 +1076,7 @@ public class Tutorial40 extends Application {
                     }
                     return false;
                 });
-                SortedList<User3> sortedData = new SortedList<>(filteredData);
+                SortedList<User4> sortedData = new SortedList<>(filteredData);
                 sortedData.comparatorProperty().bind(tableView.comparatorProperty());
                 tableView.setItems(sortedData);
             });
@@ -880,7 +1097,7 @@ public class Tutorial40 extends Application {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                data.add(new User3(
+                data.add(new User4(
                         resultSet.getString("id"),
                         resultSet.getString("firstName"),
                         resultSet.getString("LastName"),

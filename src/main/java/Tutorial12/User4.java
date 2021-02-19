@@ -2,7 +2,7 @@ package Tutorial12;
 
 import javafx.beans.property.SimpleStringProperty;
 
-public class User3 {
+public class User4 {
 
     private final SimpleStringProperty id;
     private final SimpleStringProperty firstName;
@@ -16,7 +16,7 @@ public class User3 {
     private final SimpleStringProperty hobbies;
 
 
-    public User3(String id, String firstName, String lastName, String email, String mobile, String userName, String password, String DOB, String gender, String hobbies) {
+    public User4(String id, String firstName, String lastName, String email, String mobile, String userName, String password, String DOB, String gender, String hobbies) {
         this.id = new SimpleStringProperty(id);
         this.firstName = new SimpleStringProperty(firstName);
         this.lastName = new SimpleStringProperty(lastName);

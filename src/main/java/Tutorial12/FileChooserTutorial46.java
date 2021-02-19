@@ -9,8 +9,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -18,8 +25,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.awt.*;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,7 +41,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Tutorial40 extends Application {
+public class FileChooserTutorial46 extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
@@ -51,13 +61,21 @@ public class Tutorial40 extends Application {
     private CheckBox checkBox1, checkBox2, checkBox3;
     ObservableList<String> checkBoxList = FXCollections.observableArrayList();
 
+    private FileChooser fileChooser;
+    private Button browse;
+    private File file;
+    private final Desktop desktop = Desktop.getDesktop();
+    private TextArea textArea;
+    private ImageView imageView;
+    private Image image;
+
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tut 40 - CheckBox and Database");
-
+        primaryStage.setTitle("JavaFX 8 Tut 46 - FileChooser");
 
         CheckConnection();
         fillComboBox();
+
         BorderPane layout = new BorderPane();
         Scene newScene = new Scene(layout, 1200, 800, Color.rgb(0, 0, 0, 0));
 
@@ -217,7 +235,7 @@ public class Tutorial40 extends Application {
 
         searchField = new TextField();
         searchField.setFont(Font.font("SanSerif", 20));
-        searchField.setPromptText("ID");
+        searchField.setPromptText("Search Field");
         searchField.setMaxWidth(200);
 
 
@@ -229,7 +247,7 @@ public class Tutorial40 extends Application {
         ln = new TextField();
         ln.setFont(Font.font("SanSerif", 20));
         ln.setPromptText("Last Name");
-        ln.setMaxWidth(300);
+        ln.setMaxWidth(200);
 
         em = new TextField();
         em.setFont(Font.font("SanSerif", 20));
@@ -290,7 +308,60 @@ public class Tutorial40 extends Application {
         checkBox1.requestFocus();
         checkBox2.requestFocus();
         checkBox3.requestFocus();
-        clear.requestFocus();
+        //clear.requestFocus();
+
+        textArea = new TextArea();
+        textArea.setFont(Font.font("SanSerif", 12));
+        textArea.setPromptText("Path of Selected File or Files");
+        textArea.setPrefSize(300, 50);
+        textArea.setEditable(false);
+
+
+        fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new javafx.stage.FileChooser.ExtensionFilter("Text Files", "*.txt"),
+                new javafx.stage.FileChooser.ExtensionFilter("Image Files", "*.png", "*.png", "*.jpg", "*.gif"),
+                new javafx.stage.FileChooser.ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.acc"),
+                new javafx.stage.FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+
+        browse = new Button("Browse");
+        browse.setFont(Font.font("SanSerif", 15));
+        browse.setOnAction(e -> {
+
+            //Single File Selection
+            file = fileChooser.showOpenDialog(primaryStage);
+            if (file != null) {
+
+                    //desktop.open(file);
+                    textArea.setText(file.getAbsolutePath());
+                    image = new Image(file.toURI().toString(), 100, 150, true, true); // path, PrefWidth, PrefHeight, PreserveRatio, smooth
+                    imageView = new ImageView(image);
+                    imageView.setFitWidth(100);
+                    imageView.setFitHeight(150);
+                    imageView.setPreserveRatio(true);
+
+                    layout.setCenter(imageView);
+                    BorderPane.setAlignment(imageView, Pos.TOP_LEFT);
+
+            }
+
+
+
+/*            //Multiple File Selection
+            List<File> fileList = fileChooser.showOpenMultipleDialog(primaryStage);
+            if (fileList != null) {
+                fileList.stream().forEach(selectedFile -> {
+                    try {
+                        desktop.open(selectedFile);
+                        textArea.setText(fileList.toString());
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                });
+            }*/
+        });
+
         Button save = new Button("Save");
         save.setFont(Font.font("SanSerif", 15));
 
@@ -378,12 +449,12 @@ public class Tutorial40 extends Application {
         });
 
 
-        fields.getChildren().addAll(searchField, label1, id, fn, ln, em, mobile, un, pw, datePicker, male, female, checkBox1, checkBox2, checkBox3, save);
+        fields.getChildren().addAll(searchField, label1, id, fn, ln, em, mobile, un, pw, datePicker, male, female, checkBox1, checkBox2, checkBox3, browse, textArea, save);
         listView.setMaxSize(100, 250);
-        layout.setLeft(listView);
-        BorderPane.setMargin(listView, new Insets(10));
-        layout.setCenter(fields);
-        BorderPane.setMargin(fields, new Insets(0, 0, 0, 20));
+        //layout.setLeft(listView);
+        //BorderPane.setMargin(listView, new Insets(10));
+        layout.setLeft(fields);
+        BorderPane.setMargin(fields, new Insets(0, 10, 0, 10));
 
 
         TableColumn column1 = new TableColumn("ID");
@@ -555,7 +626,8 @@ public class Tutorial40 extends Application {
                 }
                 preparedStatement.close();
                 resultSet.close();
-            } catch (SQLException throwables) {
+            } catch (
+                    SQLException throwables) {
                 throwables.printStackTrace();
             }
 
