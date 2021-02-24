@@ -1,153 +1,113 @@
 package Tutorial12;
 
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
 public class User3 {
 
-    private final SimpleStringProperty id;
-    private final SimpleStringProperty firstName;
-    private final SimpleStringProperty lastName;
-    private final SimpleStringProperty email;
-    private final SimpleStringProperty mobile;
-    private final SimpleStringProperty userName;
-    private final SimpleStringProperty password;
-    private final SimpleStringProperty DOB;
-    private final SimpleStringProperty gender;
-    private final SimpleStringProperty hobbies;
+    private final SimpleObjectProperty id;
+    private final SimpleObjectProperty firstName;
+    private final SimpleObjectProperty lastName;
+    private final SimpleObjectProperty email;
+    private final SimpleObjectProperty mobile;
+    private final SimpleObjectProperty userName;
+    private final SimpleObjectProperty password;
+    private final SimpleObjectProperty DOB;
+    private final SimpleObjectProperty gender;
+    private final SimpleObjectProperty hobbies;
 
 
-    public User3(String id, String firstName, String lastName, String email, String mobile, String userName, String password, String DOB, String gender, String hobbies) {
-        this.id = new SimpleStringProperty(id);
-        this.firstName = new SimpleStringProperty(firstName);
-        this.lastName = new SimpleStringProperty(lastName);
-        this.email = new SimpleStringProperty(email);
-        this.mobile = new SimpleStringProperty(mobile);
-        this.userName = new SimpleStringProperty(userName);
-        this.password = new SimpleStringProperty(password);
-        this.DOB = new SimpleStringProperty(DOB);
-        this.gender = new SimpleStringProperty(gender);
-        this.hobbies = new SimpleStringProperty(hobbies);
+    public User3(int id, String firstName, String lastName, String email, String mobile, String userName, String password, String DOB, String gender, String hobbies) {
+        this.id = new SimpleObjectProperty(id);
+        this.firstName = new SimpleObjectProperty(firstName);
+        this.lastName = new SimpleObjectProperty(lastName);
+        this.email = new SimpleObjectProperty(email);
+        this.mobile = new SimpleObjectProperty(mobile);
+        this.userName = new SimpleObjectProperty(userName);
+        this.password = new SimpleObjectProperty(password);
+        this.DOB = new SimpleObjectProperty(DOB);
+        this.gender = new SimpleObjectProperty(gender);
+        this.hobbies = new SimpleObjectProperty(hobbies);
     }
 
-    public String getId() {
+
+    public Object getId() {
         return id.get();
     }
 
-    public SimpleStringProperty idProperty() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id.set(id);
-    }
-
-    public String getFirstName() {
+    public Object getFirstName() {
         return firstName.get();
     }
 
-    public SimpleStringProperty firstNameProperty() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName.set(firstName);
-    }
-
-    public String getLastName() {
+    public Object getLastName() {
         return lastName.get();
     }
 
-    public SimpleStringProperty lastNameProperty() {
-        return lastName;
+    public Object getEmail() {
+        return email.get();
+    }
+
+    public Object getMobile() {
+        return mobile.get();
+    }
+
+    public Object getUserName() {
+        return userName.get();
+    }
+
+    public Object getPassword() {
+        return password.get();
+    }
+
+    public Object getDOB() {
+        return DOB.get();
+    }
+
+    public Object getGender() {
+        return gender.get();
+    }
+
+    public Object getHobbies() {
+        return hobbies.get();
+    }
+
+
+    public void setFirstName(String firstName) {
+        this.firstName.set(firstName);
     }
 
     public void setLastName(String lastName) {
         this.lastName.set(lastName);
     }
 
-    public String getEmail() {
-        return email.get();
-    }
-
-    public SimpleStringProperty emailProperty() {
-        return email;
-    }
-
     public void setEmail(String email) {
         this.email.set(email);
-    }
-
-    public String getMobile() {
-        return mobile.get();
-    }
-
-    public SimpleStringProperty mobileProperty() {
-        return mobile;
     }
 
     public void setMobile(String mobile) {
         this.mobile.set(mobile);
     }
 
-    public String getUserName() {
-        return userName.get();
-    }
-
-    public SimpleStringProperty userNameProperty() {
-        return userName;
+    public void setId(int id) {
+        this.id.set(id);
     }
 
     public void setUserName(String userName) {
         this.userName.set(userName);
     }
 
-    public String getPassword() {
-        return password.get();
-    }
-
-    public SimpleStringProperty passwordProperty() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password.set(password);
-    }
-
-    public String getDOB() {
-        return DOB.get();
-    }
-
-    public SimpleStringProperty DOBProperty() {
-        return DOB;
     }
 
     public void setDOB(String DOB) {
         this.DOB.set(DOB);
     }
 
-    public String getGender() {
-        return gender.get();
-    }
-
-    public SimpleStringProperty genderProperty() {
-        return gender;
-    }
-
     public void setGender(String gender) {
         this.gender.set(gender);
-    }
-
-    public String getHobbies() {
-        return hobbies.get();
-    }
-
-    public SimpleStringProperty hobbiesProperty() {
-        return hobbies;
     }
 
     public void setHobbies(String hobbies) {
         this.hobbies.set(hobbies);
     }
 }
-
-

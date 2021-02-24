@@ -3,6 +3,8 @@ package Tutorial12;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -25,16 +27,17 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Tutorial40 extends Application {
+public class Tutorial44 extends Application {
 
     Connection conn;
     PreparedStatement preparedStatement = null;
     ResultSet resultSet = null;
 
-    TextField id, fn, ln, em, mobile, un;
+    TextField id, fn, ln, em, mobile, un, searchField;
     PasswordField pw;
     DatePicker datePicker;
 
@@ -50,13 +53,13 @@ public class Tutorial40 extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("JavaFX 8 Tut 40 - CheckBox and Database");
+        primaryStage.setTitle("JavaFX 8 Tut 44 - Search or Filter Table By ID, FirstName and LastName");
 
 
         CheckConnection();
         fillComboBox();
         BorderPane layout = new BorderPane();
-        Scene newScene = new Scene(layout, 1200, 600, Color.rgb(0, 0, 0, 0));
+        Scene newScene = new Scene(layout, 1200, 800, Color.rgb(0, 0, 0, 0));
 
         // Create transparent stage
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
@@ -81,16 +84,16 @@ public class Tutorial40 extends Application {
 
         VBox vBox = new VBox(5);
         vBox.setPadding(new Insets(10, 0, 0, 10));
+
         Label label = new Label("Login Status");
         //label.setTextFill(Color.WHITESMOKE);
         label.setFont(new Font("SanSerif", 20));
 
+
         TextField userName = new TextField();
         userName.setFont(Font.font("SanSerif", 20));
         userName.setPromptText("User Name");
-
         userName.getStyleClass().add("field-background");
-
         userName.setMaxWidth(200);
 
 
@@ -204,6 +207,11 @@ public class Tutorial40 extends Application {
         VBox fields = new VBox(5);
         Label label1 = new Label("Create New User");
         label1.setFont(new Font("SanSerif", 15));
+
+        searchField = new TextField();
+        searchField.setFont(Font.font("SanSerif", 20));
+        searchField.setPromptText("Search Field");
+        searchField.setMaxWidth(300);
 
         id = new TextField();
         id.setFont(Font.font("SanSerif", 20));
@@ -361,7 +369,7 @@ public class Tutorial40 extends Application {
         });
 
 
-        fields.getChildren().addAll(label1, id, fn, ln, em, mobile, un, pw, datePicker, male, female, checkBox1, checkBox2, checkBox3, save);
+        fields.getChildren().addAll(searchField, label1, id, fn, ln, em, mobile, un, pw, datePicker, male, female, checkBox1, checkBox2, checkBox3, save);
         listView.setMaxSize(100, 250);
         layout.setLeft(listView);
         BorderPane.setMargin(listView, new Insets(10));
@@ -477,7 +485,7 @@ public class Tutorial40 extends Application {
                         female.setSelected(false);
                     }
 
-                    //Retrieve Hobbies Into CheckBox
+                    /**Retrieve Hobbies Into CheckBox*/
                     if (resultSet.getString("hobbies") != null) {
                         checkBox1.setSelected(false);
                         checkBox2.setSelected(false);
@@ -519,6 +527,9 @@ public class Tutorial40 extends Application {
                     }
 
 
+                    /**End of Retrieve checkbox*/
+
+
                 }
                 preparedStatement.close();
                 resultSet.close();
@@ -527,6 +538,7 @@ public class Tutorial40 extends Application {
             }
 
         });
+
 
         listView.setOnMouseClicked(e -> {
             String query = "SELECT * FROM UserTable WHERE FirstName = ?";
@@ -610,11 +622,186 @@ public class Tutorial40 extends Application {
 
         });
 
+
+        /** Table View By Click fetch data*/
+        tableView.setOnMouseClicked(e -> {
+
+
+            try {
+                User3 user = (User3) tableView.getSelectionModel().getSelectedItem();
+                String query = "SELECT * FROM UserTable WHERE ID = ?";
+                preparedStatement = conn.prepareStatement(query);
+                preparedStatement.setString(1, user.getId());
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+                    id.setText(resultSet.getString("ID"));
+                    fn.setText(resultSet.getString("FirstName"));
+                    ln.setText(resultSet.getString("LastName"));
+                    em.setText(resultSet.getString("Email"));
+                    mobile.setText(resultSet.getString("Mobile"));
+                    un.setText(resultSet.getString("UserName"));
+                    pw.setText(resultSet.getString("Password"));
+
+                    ((TextField) datePicker.getEditor()).setText(resultSet.getString("DOB"));
+
+
+                    //SWITCH Retrieve data into comboBox
+                    if (null != resultSet.getString("Gender")) switch (resultSet.getString("gender")) {
+                        case "Male":
+                            male.setSelected(true);
+                            break;
+                        case "Female":
+                            female.setSelected(true);
+                            break;
+                        default:
+                            male.setSelected(false);
+                            female.setSelected(false);
+                            break;
+                    }
+                    else {
+                        male.setSelected(false);
+                        female.setSelected(false);
+                    }
+                }
+                preparedStatement.close();
+                resultSet.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+        });
+        /** End of Table*/
+
+        /**Fetch Database Values on Table KeyReleased Method*/
+        tableView.setOnKeyReleased(e -> {
+            if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
+                try {
+                    User3 user = (User3) tableView.getSelectionModel().getSelectedItem();
+                    String query = "SELECT * FROM UserTable WHERE ID = ?";
+                    preparedStatement = conn.prepareStatement(query);
+                    preparedStatement.setString(1, user.getId());
+                    resultSet = preparedStatement.executeQuery();
+
+                    while (resultSet.next()) {
+                        id.setText(resultSet.getString("ID"));
+                        fn.setText(resultSet.getString("FirstName"));
+                        ln.setText(resultSet.getString("LastName"));
+                        em.setText(resultSet.getString("Email"));
+                        mobile.setText(resultSet.getString("Mobile"));
+                        un.setText(resultSet.getString("UserName"));
+                        pw.setText(resultSet.getString("Password"));
+
+                        ((TextField) datePicker.getEditor()).setText(resultSet.getString("DOB"));
+
+
+                        //SWITCH Retrieve data into comboBox
+                        if (null != resultSet.getString("Gender")) switch (resultSet.getString("gender")) {
+                            case "Male":
+                                male.setSelected(true);
+                                break;
+                            case "Female":
+                                female.setSelected(true);
+                                break;
+                            default:
+                                male.setSelected(false);
+                                female.setSelected(false);
+                                break;
+                        }
+                        else {
+                            male.setSelected(false);
+                            female.setSelected(false);
+                        }
+                        /**Retrieve Hobbies Into CheckBox*/
+                        if (resultSet.getString("hobbies") != null) {
+                            checkBox1.setSelected(false);
+                            checkBox2.setSelected(false);
+                            checkBox3.setSelected(false);
+
+                            //hobbies in this string format - [Playing, Dancing]
+                            System.out.println(resultSet.getString("hobbies"));
+
+                            String checkBoxString = resultSet.getString("hobbies").replace("[", "").replace("]", "");
+                            System.out.println(checkBoxString);
+
+                            //now can convert to a list, strip out commas and spaces
+                            List<String> hobbyList = Arrays.asList(checkBoxString.split("\\s*,\\s*"));
+                            System.out.println(hobbyList);
+
+                            for (String hobby : hobbyList) {
+                                switch (hobby) {
+                                    case "Playing":
+                                        checkBox1.setSelected(true);
+                                        break;
+                                    case "Singing":
+                                        checkBox2.setSelected(true);
+                                        break;
+
+                                    case "Dancing":
+                                        checkBox3.setSelected(true);
+                                        break;
+                                    default:
+                                        checkBox1.setSelected(false);
+                                        checkBox2.setSelected(false);
+                                        checkBox3.setSelected(false);
+                                        break;
+                                }
+                            }
+                        } else {
+                            checkBox1.setSelected(false);
+                            checkBox2.setSelected(false);
+                            checkBox3.setSelected(false);
+                        }
+
+
+                        /**End of Retrieve checkbox*/
+                    }
+                    preparedStatement.close();
+                    resultSet.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+
+            }
+        });
+        /**End of Table KeyReleased Method*/
+
+
         HBox hBox = new HBox(5);
         hBox.getChildren().addAll(load, comboBox, clear, update, delete);
 //        fields.getChildren().add(hBox);
         layout.setBottom(hBox);
         BorderPane.setMargin(hBox, new Insets(10));
+
+
+        /**Start Search or Filter Table By ID, FirstName and LastName*/
+        FilteredList<User3> filteredData = new FilteredList<>(data, e -> true);
+        searchField.setOnKeyReleased(event -> {
+            searchField.textProperty().addListener((observableValue, oldValue, newValue) -> {
+                filteredData.setPredicate((Predicate<? super User3>) user -> {
+                    if (newValue == null || newValue.isEmpty()) {
+                        return true;
+                    }
+                    String lowerCaseFilter = newValue.toLowerCase();
+                    if (user.getId().contains(newValue)) {
+                        return true;
+                    } else if (user.getFirstName().toLowerCase().contains(lowerCaseFilter)) {
+                        return true;
+                    } else if (user.getLastName().toLowerCase().contains(lowerCaseFilter)) {
+                        return true;
+                    }
+
+                    return false;
+                });
+            });
+            SortedList<User3> sortedData = new SortedList<>(filteredData);
+            sortedData.comparatorProperty().bind(tableView.comparatorProperty());
+            tableView.setItems(sortedData);
+        });
+
+        /**End Search or Filter Table By ID, FirstName and LastName*/
+
+
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -629,7 +816,7 @@ public class Tutorial40 extends Application {
 
             while (resultSet.next()) {
                 data.add(new User3(
-                        resultSet.getInt("id"),
+                        resultSet.getString("id"),
                         resultSet.getString("firstName"),
                         resultSet.getString("LastName"),
                         resultSet.getString("Email"),
@@ -747,7 +934,6 @@ public class Tutorial40 extends Application {
             return false;
         }
     }
-
 
 
     private boolean validateFields() {
