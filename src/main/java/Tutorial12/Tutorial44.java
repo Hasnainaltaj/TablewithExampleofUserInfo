@@ -42,8 +42,8 @@ public class Tutorial44 extends Application {
     DatePicker datePicker;
 
     final ObservableList options = FXCollections.observableArrayList();
-    TableView<User3> tableView = new TableView<>();
-    final ObservableList<User3> data = FXCollections.observableArrayList();
+    TableView<User4> tableView = new TableView<>();
+    final ObservableList<User4> data = FXCollections.observableArrayList();
     private RadioButton male;
     private RadioButton female;
     private String radioButtonLabel;
@@ -628,7 +628,7 @@ public class Tutorial44 extends Application {
 
 
             try {
-                User3 user = (User3) tableView.getSelectionModel().getSelectedItem();
+                User4 user = (User4) tableView.getSelectionModel().getSelectedItem();
                 String query = "SELECT * FROM UserTable WHERE ID = ?";
                 preparedStatement = conn.prepareStatement(query);
                 preparedStatement.setString(1, user.getId());
@@ -677,7 +677,7 @@ public class Tutorial44 extends Application {
         tableView.setOnKeyReleased(e -> {
             if (e.getCode() == KeyCode.UP || e.getCode() == KeyCode.DOWN) {
                 try {
-                    User3 user = (User3) tableView.getSelectionModel().getSelectedItem();
+                    User4 user = (User4) tableView.getSelectionModel().getSelectedItem();
                     String query = "SELECT * FROM UserTable WHERE ID = ?";
                     preparedStatement = conn.prepareStatement(query);
                     preparedStatement.setString(1, user.getId());
@@ -775,10 +775,10 @@ public class Tutorial44 extends Application {
 
 
         /**Start Search or Filter Table By ID, FirstName and LastName*/
-        FilteredList<User3> filteredData = new FilteredList<>(data, e -> true);
+        FilteredList<User4> filteredData = new FilteredList<>(data, e -> true);
         searchField.setOnKeyReleased(event -> {
             searchField.textProperty().addListener((observableValue, oldValue, newValue) -> {
-                filteredData.setPredicate((Predicate<? super User3>) user -> {
+                filteredData.setPredicate((Predicate<? super User4>) user -> {
                     if (newValue == null || newValue.isEmpty()) {
                         return true;
                     }
@@ -794,7 +794,7 @@ public class Tutorial44 extends Application {
                     return false;
                 });
             });
-            SortedList<User3> sortedData = new SortedList<>(filteredData);
+            SortedList<User4> sortedData = new SortedList<>(filteredData);
             sortedData.comparatorProperty().bind(tableView.comparatorProperty());
             tableView.setItems(sortedData);
         });
@@ -815,7 +815,7 @@ public class Tutorial44 extends Application {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                data.add(new User3(
+                data.add(new User4(
                         resultSet.getString("id"),
                         resultSet.getString("firstName"),
                         resultSet.getString("LastName"),

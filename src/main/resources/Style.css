@@ -1,5 +1,5 @@
 .label {
-    -fx-text-fill: whitesmoke;
+    -fx-text-fill: black;
 }
 
 .button {
@@ -24,3 +24,32 @@
     -fx-background-color: rgb(190, 229, 128);
     -fx-alignment: center;
 }
+
+.chart {
+    -fx-clockwise: false;
+    -fx-pie-label-visibel: true;
+    -fx-label-line-length: 2;
+    -fx-start-angle: 30;
+    -fx-legend-side: left;
+}
+
+.chart-pie-label {
+    -fx-font-size: 10px;
+}
+
+.chart-content {
+    -fx-padding: 2;
+}
+
+.default-color0.chart-pie {
+    -fx-pie-color: yellow;
+}
+
+.chart-legend {
+    -fx-background-color: white;
+    -fx-border-color: black;
+    -fx-border-width: 2;
+}
+
+
+
